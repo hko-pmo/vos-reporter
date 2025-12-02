@@ -1,0 +1,8 @@
+{
+    "name": "VOS Weather Reporter",
+    "short_name": "VOS Report",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#005a9c"
+}

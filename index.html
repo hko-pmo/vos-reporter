@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOS Weather Reporter</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#005a9c">
+</head>
+<body>
+    <header>
+        <h1>Weather Report Composer</h1>
+        <div id="step-indicator">Step 1 of X</div>
+    </header>
+
+    <main id="app-container">
+        <div id="global-preview" class="global-preview"></div>
+        <!-- Dynamic Content will be injected here -->
+        <div id="wizard-content"></div>
+    </main>
+
+    <footer>
+        <div id="nav-buttons">
+            <button id="btn-back" class="nav-btn secondary">Back</button>
+            <button id="btn-skip" class="nav-btn secondary">Skip</button>
+            <button id="btn-next" class="nav-btn primary">Next</button>
+        </div>
+    </footer>
+
+    <!-- Cloud Chart Modal -->
+    <div id="cloud-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modal-title">Cloud Chart</h2>
+            <div id="modal-grid" class="cloud-grid"></div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="store.js"></script>
+    <script src="renderers.js"></script>
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW registered', reg))
+                .catch(err => console.log('SW error', err));
+        }
+    </script>
+</body>
+</html>

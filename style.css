@@ -1,0 +1,351 @@
+:root {
+    --primary-color: #005a9c;
+    --secondary-color: #f0f0f0;
+    --text-color: #333;
+    --border-color: #ccc;
+    --success-color: #28a745;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #fff;
+    color: var(--text-color);
+}
+
+header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+#step-indicator {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-top: 0.5rem;
+}
+
+main {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#wizard-content {
+    width: 100%;
+    max-width: 600px;
+}
+
+.group-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.group-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 0.5rem;
+}
+
+.group-description {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.input-group input, .input-group select {
+    width: 100%;
+    padding: 0.8rem;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.input-group .help-text {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.2rem;
+}
+
+.preview-box {
+    background-color: var(--secondary-color);
+    padding: 1rem;
+    text-align: center;
+    font-family: monospace;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    margin-top: 2rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+footer {
+    padding: 1rem;
+    background-color: #fff;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+#nav-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    max-width: 600px;
+    margin: 0 auto;
+    gap: 1rem;
+}
+
+.nav-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.nav-btn.primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.nav-btn.secondary {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+}
+
+#btn-skip {
+    background-color: #ffe0b2;
+    color: #e65100;
+    border: 1px solid #ffcc80;
+}
+
+.hidden {
+    display: none;
+}
+
+.invisible {
+    visibility: hidden;
+}
+
+/* Review Screen Styles */
+.review-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    border-bottom: 1px solid var(--secondary-color);
+}
+
+.review-item .code {
+    font-family: monospace;
+    font-weight: bold;
+    color: var(--primary-color);
+    flex-grow: 1;
+    text-align: right;
+    margin-right: 1rem;
+}
+
+.review-item .edit-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.review-item.skipped .code {
+    color: #999;
+    font-style: italic;
+    font-weight: normal;
+}
+
+.final-string-box {
+    background-color: #e8f0fe;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    word-break: break-all;
+    font-family: monospace;
+    font-size: 1.2rem;
+    text-align: center;
+    border: 1px solid var(--primary-color);
+}
+
+.copy-btn {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--success-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+}
+
+.mail-btn {
+    width: 100%;
+    padding: 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    width: 95%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close-modal:hover {
+    color: #000;
+}
+
+.cloud-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.cloud-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.1s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.cloud-card:hover {
+    transform: scale(1.02);
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.cloud-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 2px;
+    margin-bottom: 0.5rem;
+}
+
+.cloud-card .cloud-code {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    margin-bottom: 0.2rem;
+}
+
+.cloud-card .cloud-desc {
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+}
+
+.cloud-card .cloud-credit {
+    font-size: 0.6rem;
+    color: #888;
+    font-style: italic;
+}
+
+.show-chart-btn {
+    margin-left: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.global-preview {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: #e8f0fe;
+    color: #333;
+    padding: 0.8rem;
+    border-bottom: 2px solid var(--primary-color);
+    font-family: monospace;
+    font-size: 1rem;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    word-break: break-all;
+    min-height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
