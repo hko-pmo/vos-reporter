@@ -105,6 +105,8 @@ function renderStep() {
         Renderers.renderTempHumidityComponent(groupDiv, group, store, updatePreview);
     } else if (group.customComponent === 'pressure-tendency-input') {
         Renderers.renderPressureTendencyComponent(groupDiv, group, store, updatePreview);
+    } else if (group.customComponent === 'present-weather-input') {
+        Renderers.renderPresentWeatherComponent(groupDiv, group, store, updatePreview);
     } else if (group.customComponent === 'swell-input') {
         Renderers.renderSwellComponent(groupDiv, group, store, updatePreview);
     } else {
@@ -194,6 +196,22 @@ function renderStep() {
                 let val = e.target.value;
                 if (field.uppercase) val = val.toUpperCase();
                 
+                // Validation for number fields
+                if (field.type === 'number' && val !== '') {
+                    const numVal = parseFloat(val);
+                    if (field.min !== undefined && numVal < field.min) {
+                        // Optional: Visual feedback or clamping
+                        // For now, we allow typing but maybe show red border?
+                        // Or we can enforce on blur.
+                        input.setCustomValidity(`Value must be >= ${field.min}`);
+                    } else if (field.max !== undefined && numVal > field.max) {
+                        input.setCustomValidity(`Value must be <= ${field.max}`);
+                    } else {
+                        input.setCustomValidity('');
+                    }
+                    input.reportValidity();
+                }
+
                 store.updateFormData(field.id, val);
                 
                 if (field.persist) localStorage.setItem(`vos_${field.id}`, val);
@@ -354,8 +372,9 @@ function renderReviewScreen() {
     mailBtn.textContent = 'Send via Email';
     mailBtn.onclick = () => {
         const recipient = store.getFormData()['email_recipient'] || '';
+        const subject = 'OBS email';
         const body = encodeURIComponent(fullString);
-        window.location.href = `mailto:${recipient}?body=${body}`;
+        window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
     };
     container.appendChild(mailBtn);
 

@@ -90,11 +90,11 @@ const Renderers = {
 
         longFlex.appendChild(createInput('pos_long_deg', 'Degrees'));
         longFlex.appendChild(createInput('pos_long_min', 'Minutes'));
-        // Horizontal layout for Longitude: West then East
+        // Vertical layout for Longitude (same as Latitude)
         longFlex.appendChild(createRadio('pos_long_dir', 'long_dir', [
             { value: 'W', label: 'West' },
             { value: 'E', label: 'East' }
-        ], true));
+        ]));
         longRow.appendChild(longFlex);
         container.appendChild(longRow);
 
@@ -142,7 +142,7 @@ const Renderers = {
     renderTempHumidityComponent: (container, group, store, updatePreview) => {
         const formData = store.getFormData();
 
-        const createInput = (id, label, type = 'number', width = '100%', help = '') => {
+        const createInput = (id, label, type = 'number', width = '100%', help = '', min = undefined, max = undefined) => {
             const wrapper = document.createElement('div');
             wrapper.className = 'input-group';
             
@@ -157,8 +157,23 @@ const Renderers = {
             inp.style.width = width;
             inp.value = formData[id] || '';
             inp.step = '0.1';
+            if (min !== undefined) inp.min = min;
+            if (max !== undefined) inp.max = max;
+
             inp.addEventListener('input', (e) => {
-                store.updateFormData(id, e.target.value);
+                const val = e.target.value;
+                if (type === 'number' && val !== '') {
+                    const numVal = parseFloat(val);
+                    if (min !== undefined && numVal < min) {
+                        inp.setCustomValidity(`Value must be >= ${min}`);
+                    } else if (max !== undefined && numVal > max) {
+                        inp.setCustomValidity(`Value must be <= ${max}`);
+                    } else {
+                        inp.setCustomValidity('');
+                    }
+                    inp.reportValidity();
+                }
+                store.updateFormData(id, val);
                 updateTempValues();
             });
             wrapper.appendChild(inp);
@@ -172,7 +187,7 @@ const Renderers = {
             return { wrapper, inp };
         };
 
-        const airTemp = createInput('th_air_val', 'Air Temperature (Dry-bulb) [-50.0 - 60.0°C]', 'number', '100%', 'e.g. 24.5');
+        const airTemp = createInput('th_air_val', 'Air Temperature (Dry-bulb) [-50.0 - 60.0°C]', 'number', '100%', 'e.g. 24.5', -50.0, 60.0);
         container.appendChild(airTemp.wrapper);
 
         const modeWrapper = document.createElement('div');
@@ -306,10 +321,159 @@ const Renderers = {
         updateTempValues();
     },
 
+    renderPresentWeatherComponent: (container, group, store, updatePreview) => {
+        const formData = store.getFormData();
+
+        // Helper to create standard select
+        const createSelect = (field) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-group';
+            const lbl = document.createElement('label');
+            lbl.textContent = field.label;
+            wrapper.appendChild(lbl);
+            
+            const sel = document.createElement('select');
+            sel.id = field.id;
+            field.options.forEach(opt => {
+                const o = document.createElement('option');
+                o.value = opt.value;
+                o.textContent = opt.label;
+                sel.appendChild(o);
+            });
+            sel.value = formData[field.id] || field.default || '';
+            sel.addEventListener('change', (e) => {
+                store.updateFormData(field.id, e.target.value);
+                updatePreview(group);
+            });
+            wrapper.appendChild(sel);
+            if (field.help) {
+                const h = document.createElement('div');
+                h.className = 'help-text';
+                h.textContent = field.help;
+                wrapper.appendChild(h);
+            }
+            return wrapper;
+        };
+
+        // Present Weather Logic
+        const pwWrapper = document.createElement('div');
+        pwWrapper.className = 'input-group';
+        
+        const pwLabel = document.createElement('label');
+        pwLabel.textContent = 'Present Weather (ww)';
+        pwWrapper.appendChild(pwLabel);
+
+        // Category Select
+        const catSelect = document.createElement('select');
+        catSelect.style.marginBottom = '0.5rem';
+        // Add invalid styling support
+        catSelect.addEventListener('change', () => {
+            if (catSelect.value === '') catSelect.setCustomValidity('Required');
+            else catSelect.setCustomValidity('');
+        });
+
+        PRESENT_WEATHER_CATEGORIES.forEach((cat, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = cat.label;
+            catSelect.appendChild(opt);
+        });
+        
+        // Code Select
+        const codeSelect = document.createElement('select');
+        
+        // Logic to populate code select
+        const updateCodeOptions = () => {
+            const catIdx = catSelect.value;
+            const cat = PRESENT_WEATHER_CATEGORIES[catIdx];
+            codeSelect.innerHTML = '';
+            
+            // If category is the default "//", we handle it specifically
+            if (cat.options.length === 1 && cat.options[0].value === '//') {
+                 const o = document.createElement('option');
+                 o.value = '//';
+                 o.textContent = '//: Not observed or not determined';
+                 codeSelect.appendChild(o);
+                 codeSelect.disabled = true;
+                 codeSelect.style.backgroundColor = '#e9ecef'; // Grey out
+                 store.updateFormData('present_weather', '//');
+            } else {
+                 cat.options.forEach(opt => {
+                    const o = document.createElement('option');
+                    o.value = opt.value;
+                    o.textContent = opt.label;
+                    codeSelect.appendChild(o);
+                 });
+                 codeSelect.disabled = false;
+                 codeSelect.style.backgroundColor = '';
+                 
+                 // If current formData value is in this category, keep it. Else select first.
+                 const currentVal = formData['present_weather'];
+                 const exists = cat.options.find(o => o.value === currentVal);
+                 if (exists) {
+                     codeSelect.value = currentVal;
+                 } else {
+                     codeSelect.value = cat.options[0].value;
+                     store.updateFormData('present_weather', cat.options[0].value);
+                 }
+            }
+        };
+
+        // Initialize Category based on current formData['present_weather']
+        const currentPw = formData['present_weather'] || '//';
+        let foundCatIndex = 0;
+        PRESENT_WEATHER_CATEGORIES.forEach((cat, idx) => {
+            if (cat.options.find(o => o.value === currentPw)) {
+                foundCatIndex = idx;
+            }
+        });
+        catSelect.value = foundCatIndex;
+        
+        catSelect.addEventListener('change', () => {
+            updateCodeOptions();
+            updatePreview(group);
+        });
+
+        codeSelect.addEventListener('change', (e) => {
+            store.updateFormData('present_weather', e.target.value);
+            updatePreview(group);
+        });
+
+        pwWrapper.appendChild(catSelect);
+        pwWrapper.appendChild(codeSelect);
+        
+        // Initial population
+        updateCodeOptions();
+        // Ensure correct value is selected after population if it wasn't set by updateCodeOptions
+        if (!codeSelect.disabled) {
+             const currentVal = formData['present_weather'];
+             // Verify again if it exists in current options (it should)
+             if ([...codeSelect.options].some(o => o.value === currentVal)) {
+                 codeSelect.value = currentVal;
+             }
+        }
+
+        if (group.fields.find(f => f.id === 'present_weather').help) {
+             const h = document.createElement('div');
+             h.className = 'help-text';
+             h.textContent = group.fields.find(f => f.id === 'present_weather').help;
+             pwWrapper.appendChild(h);
+        }
+
+        container.appendChild(pwWrapper);
+
+        // Render Past Weather 1 & 2
+        const w1Field = group.fields.find(f => f.id === 'past_weather_1');
+        const w2Field = group.fields.find(f => f.id === 'past_weather_2');
+        
+        container.appendChild(createSelect(w1Field));
+        container.appendChild(createSelect(w2Field));
+    },
+
     renderPressureTendencyComponent: (container, group, store, updatePreview) => {
         const formData = store.getFormData();
 
-        const createInput = (id, label, type = 'number', width = '100%', help = '') => {
+        const createInput = (id, label, type = 'number', width = '100%', help = '', min = undefined, max = undefined) => {
             const wrapper = document.createElement('div');
             wrapper.className = 'input-group';
             
@@ -324,8 +488,23 @@ const Renderers = {
             inp.style.width = width;
             inp.value = formData[id] || '';
             inp.step = '0.1';
+            if (min !== undefined) inp.min = min;
+            if (max !== undefined) inp.max = max;
+
             inp.addEventListener('input', (e) => {
-                store.updateFormData(id, e.target.value);
+                const val = e.target.value;
+                if (type === 'number' && val !== '') {
+                    const numVal = parseFloat(val);
+                    if (min !== undefined && numVal < min) {
+                        inp.setCustomValidity(`Value must be >= ${min}`);
+                    } else if (max !== undefined && numVal > max) {
+                        inp.setCustomValidity(`Value must be <= ${max}`);
+                    } else {
+                        inp.setCustomValidity('');
+                    }
+                    inp.reportValidity();
+                }
+                store.updateFormData(id, val);
                 updateValues();
             });
             wrapper.appendChild(inp);
@@ -339,7 +518,7 @@ const Renderers = {
             return { wrapper, inp };
         };
 
-        const pressInput = createInput('pt_pressure', 'Pressure [860.0 - 1070.0 hPa]', 'number', '100%', 'e.g. 1014.2. Leave empty if not measured.');
+        const pressInput = createInput('pt_pressure', 'Pressure [860.0 - 1070.0 hPa]', 'number', '100%', 'e.g. 1014.2. Leave empty if not measured.', 860.0, 1070.0);
         container.appendChild(pressInput.wrapper);
 
         const charWrapper = document.createElement('div');
@@ -377,7 +556,7 @@ const Renderers = {
         charWrapper.appendChild(charSelect);
         container.appendChild(charWrapper);
 
-        const amountInput = createInput('pt_amount', 'Amount of Change [0.0 - 50.0 hPa]', 'number', '100%', 'Change in last 3 hours, e.g. 1.4 hPa. No negative numbers. Use "Characteristic" to indicate sign.');
+        const amountInput = createInput('pt_amount', 'Amount of Change [0.0 - 50.0 hPa]', 'number', '100%', 'Change in last 3 hours, e.g. 1.4 hPa. No negative numbers. Use "Characteristic" to indicate sign.', 0.0, 50.0);
         container.appendChild(amountInput.wrapper);
 
         function updateVisibility() {
@@ -428,7 +607,7 @@ const Renderers = {
     renderSwellComponent: (container, group, store, updatePreview) => {
         const formData = store.getFormData();
 
-        const createInput = (id, label, type = 'number', width = '100%', help = '', step = '1', max = '') => {
+        const createInput = (id, label, type = 'number', width = '100%', help = '', step = '1', max = '', min = undefined) => {
             const wrapper = document.createElement('div');
             wrapper.className = 'input-group';
             
@@ -444,9 +623,22 @@ const Renderers = {
             inp.value = formData[id] || '';
             if (step) inp.step = step;
             if (max) inp.max = max;
+            if (min !== undefined) inp.min = min;
             
             inp.addEventListener('input', (e) => {
-                store.updateFormData(id, e.target.value);
+                const val = e.target.value;
+                if (type === 'number' && val !== '') {
+                    const numVal = parseFloat(val);
+                    if (min !== undefined && numVal < min) {
+                        inp.setCustomValidity(`Value must be >= ${min}`);
+                    } else if (max !== '' && numVal > parseFloat(max)) {
+                        inp.setCustomValidity(`Value must be <= ${max}`);
+                    } else {
+                        inp.setCustomValidity('');
+                    }
+                    inp.reportValidity();
+                }
+                store.updateFormData(id, val);
                 updateSwellValues();
             });
             wrapper.appendChild(inp);
@@ -493,13 +685,13 @@ const Renderers = {
         const inputsContainer = document.createElement('div');
         container.appendChild(inputsContainer);
 
-        const s1Dir = createInput('swell1_dir', 'Primary Swell Direction (Tens)', 'number', '100%', '01-36. 00: Calm. 99: Confused. /: Unknown.', '1', '99');
-        const s1Per = createInput('swell1_period', 'Primary Swell Period (Seconds)', 'text', '100%', '/: Not determined.');
-        const s1Hgt = createInput('swell1_height', 'Primary Swell Height (Meters)', 'text', '100%', 'Input in meters (e.g. 2.5).', '0.1', '49');
+        const s1Dir = createInput('swell1_dir', 'Primary Swell Direction [Tens of Degrees]', 'number', '100%', '1-36. 0: Calm. 99: Confused. /: Unknown.', '1', '99', 0);
+        const s1Per = createInput('swell1_period', 'Primary Swell Period [1 - 50 Seconds]', 'text', '100%', '/: Not determined.');
+        const s1Hgt = createInput('swell1_height', 'Primary Swell Height [0.5 - 49.0 Meters]', 'text', '100%', 'Input in meters (e.g. 2.5).', '0.1', '49', 0);
 
-        const s2Dir = createInput('swell2_dir', 'Secondary Swell Direction (Tens)', 'number', '100%', '01-36. 00: Calm. 99: Confused. /: Unknown.', '1', '99');
-        const s2Per = createInput('swell2_period', 'Secondary Swell Period (Seconds)', 'text', '100%', '/: Not determined.');
-        const s2Hgt = createInput('swell2_height', 'Secondary Swell Height (Meters)', 'text', '100%', 'Input in meters (e.g. 2.5).', '0.1', '49');
+        const s2Dir = createInput('swell2_dir', 'Secondary Swell Direction [Tens of Degrees]', 'number', '100%', '1-36. 0: Calm. 99: Confused. /: Unknown.', '1', '99', 0);
+        const s2Per = createInput('swell2_period', 'Secondary Swell Period [1 - 50 Seconds]', 'text', '100%', '/: Not determined.');
+        const s2Hgt = createInput('swell2_height', 'Secondary Swell Height [0.5 - 49.0 Meters]', 'text', '100%', 'Input in meters (e.g. 2.5).', '0.1', '49', 0);
 
         [s1Dir, s1Per, s1Hgt, s2Dir, s2Per, s2Hgt].forEach(el => {
             el.wrapper.style.display = 'none';

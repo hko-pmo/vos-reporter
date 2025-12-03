@@ -91,6 +91,12 @@ main {
     border-radius: 4px;
 }
 
+.input-group input:invalid,
+.input-group select:invalid {
+    border-color: #dc3545;
+    background-color: #fff8f8;
+}
+
 .input-group .help-text {
     font-size: 0.8rem;
     color: #666;

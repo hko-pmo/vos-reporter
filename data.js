@@ -129,7 +129,7 @@ const REPORT_STRUCTURE = [
             { 
                 id: 'wind_dir', 
                 type: 'number', 
-                label: 'True Wind Dir (dd) [Tens of degrees]', 
+                label: 'True Wind Direction (dd) [Tens of degrees]', 
                 min: 0, 
                 max: 99, 
                 width: 2, 
@@ -171,6 +171,7 @@ const REPORT_STRUCTURE = [
         name: 'Present & Past Weather',
         section: 1,
         mandatory: false,
+        customComponent: 'present-weather-input',
         fields: [
             { id: 'indicator_7', type: 'static', value: '7', label: 'Indicator', hidden: true },
             { 
@@ -180,131 +181,7 @@ const REPORT_STRUCTURE = [
                 width: 2, 
                 pad: true, 
                 default: '//',
-                help: 'Select the most severe weather condition observed. For detail, refer to WMO code table 4677.',
-                options: [
-                    { value: '//', label: '//: Not observed or not determined' },
-                    // 95-99 THUNDERSTORM AT TIME OF OBSERVATION
-                    { value: '99', label: '99: Heavy thunderstorm with hail' },
-                    { value: '98', label: '98: Thunderstorm with duststorm or sandstorm' },
-                    { value: '97', label: '97: Heavy thunderstorm with rain/snow, no hail' },
-                    { value: '96', label: '96: Slight/moderate thunderstorm with hail' },
-                    { value: '95', label: '95: Slight/moderate thunderstorm with rain/snow, no hail' },
-                    
-                    // 91-94 THUNDERSTORM PAST HOUR
-                    { value: '94', label: '94: Mod/heavy snow/rain/hail & Thunderstorm in past hour' },
-                    { value: '93', label: '93: Slight snow/rain/hail & Thunderstorm in past hour' },
-                    { value: '92', label: '92: Moderate or heavy rain & Thunderstorm in past hour' },
-                    { value: '91', label: '91: Slight rain & Thunderstorm in past hour' },
-
-                    // 80-90 SHOWERS
-                    { value: '90', label: '90: Shower of hail, moderate or heavy' },
-                    { value: '89', label: '89: Shower of hail, slight' },
-                    { value: '88', label: '88: Shower of snow/ice pellets, moderate or heavy' },
-                    { value: '87', label: '87: Shower of snow/ice pellets, slight' },
-                    { value: '86', label: '86: Shower of snow, moderate or heavy' },
-                    { value: '85', label: '85: Shower of snow, slight' },
-                    { value: '84', label: '84: Shower of rain and snow mixed, moderate or heavy' },
-                    { value: '83', label: '83: Shower of rain and snow mixed, slight' },
-                    { value: '82', label: '82: Violent rain shower' },
-                    { value: '81', label: '81: Moderate or heavy rain shower' },
-                    { value: '80', label: '80: Slight rain shower' },
-
-                    // 70-79 SOLID PRECIPITATION (NOT SHOWERS)
-                    { value: '79', label: '79: Ice pellets' },
-                    { value: '78', label: '78: Isolated star-like snow crystals' },
-                    { value: '77', label: '77: Snow grains' },
-                    { value: '76', label: '76: Diamond dust' },
-                    { value: '75', label: '75: Heavy snow in flakes (Continuous)' },
-                    { value: '74', label: '74: Heavy snow in flakes (Intermittent)' },
-                    { value: '73', label: '73: Moderate snow in flakes (Continuous)' },
-                    { value: '72', label: '72: Moderate snow in flakes (Intermittent)' },
-                    { value: '71', label: '71: Slight snow in flakes (Continuous)' },
-                    { value: '70', label: '70: Slight snow in flakes (Intermittent)' },
-
-                    // 60-69 RAIN (NOT SHOWERS)
-                    { value: '69', label: '69: Rain/drizzle with snow, moderate or heavy' },
-                    { value: '68', label: '68: Rain/drizzle with snow, slight' },
-                    { value: '67', label: '67: Freezing rain, moderate or heavy' },
-                    { value: '66', label: '66: Freezing rain, slight' },
-                    { value: '65', label: '65: Heavy rain (Continuous)' },
-                    { value: '64', label: '64: Heavy rain (Intermittent)' },
-                    { value: '63', label: '63: Moderate rain (Continuous)' },
-                    { value: '62', label: '62: Moderate rain (Intermittent)' },
-                    { value: '61', label: '61: Slight rain (Continuous)' },
-                    { value: '60', label: '60: Slight rain (Intermittent)' },
-
-                    // 50-59 DRIZZLE
-                    { value: '59', label: '59: Drizzle and rain mixed, moderate or heavy' },
-                    { value: '58', label: '58: Drizzle and rain mixed, slight' },
-                    { value: '57', label: '57: Freezing drizzle, moderate or heavy' },
-                    { value: '56', label: '56: Freezing drizzle, slight' },
-                    { value: '55', label: '55: Heavy drizzle (Continuous)' },
-                    { value: '54', label: '54: Heavy drizzle (Intermittent)' },
-                    { value: '53', label: '53: Moderate drizzle (Continuous)' },
-                    { value: '52', label: '52: Moderate drizzle (Intermittent)' },
-                    { value: '51', label: '51: Slight drizzle (Continuous)' },
-                    { value: '50', label: '50: Slight drizzle (Intermittent)' },
-
-                    // 40-49 FOG
-                    { value: '49', label: '49: Fog, depositing rime (Sky invisible)' },
-                    { value: '48', label: '48: Fog, depositing rime (Sky visible)' },
-                    { value: '47', label: '47: Fog, begun/thickened in past hour (Sky invisible)' },
-                    { value: '46', label: '46: Fog, begun/thickened in past hour (Sky visible)' },
-                    { value: '45', label: '45: Fog, no change in past hour (Sky invisible)' },
-                    { value: '44', label: '44: Fog, no change in past hour (Sky visible)' },
-                    { value: '43', label: '43: Fog, thinner in past hour (Sky invisible)' },
-                    { value: '42', label: '42: Fog, thinner in past hour (Sky visible)' },
-                    { value: '41', label: '41: Fog in patches' },
-                    { value: '40', label: '40: Fog at a distance' },
-
-                    // 30-39 DUST/SAND/SNOW STORMS
-                    { value: '39', label: '39: Heavy blowing snow (high)' },
-                    { value: '38', label: '38: Slight/moderate blowing snow (high)' },
-                    { value: '37', label: '37: Heavy drifting snow (low)' },
-                    { value: '36', label: '36: Slight/moderate drifting snow (low)' },
-                    { value: '35', label: '35: Heavy dust/sandstorm (increasing)' },
-                    { value: '34', label: '34: Heavy dust/sandstorm (unchanging)' },
-                    { value: '33', label: '33: Heavy dust/sandstorm (decreasing)' },
-                    { value: '32', label: '32: Slight/moderate dust/sandstorm (increasing)' },
-                    { value: '31', label: '31: Slight/moderate dust/sandstorm (unchanging)' },
-                    { value: '30', label: '30: Slight/moderate dust/sandstorm (decreasing)' },
-
-                    // 20-29 PHENOMENA IN PAST HOUR
-                    { value: '29', label: '29: Thunderstorm (with/without precip)' },
-                    { value: '28', label: '28: Fog' },
-                    { value: '27', label: '27: Shower(s) of hail/rain mixed' },
-                    { value: '26', label: '26: Shower(s) of snow/rain mixed' },
-                    { value: '25', label: '25: Shower(s) of rain' },
-                    { value: '24', label: '24: Freezing drizzle or freezing rain' },
-                    { value: '23', label: '23: Rain and snow mixed, or ice pellets' },
-                    { value: '22', label: '22: Snow' },
-                    { value: '21', label: '21: Rain (not freezing)' },
-                    { value: '20', label: '20: Drizzle (not freezing) or snow grains' },
-
-                    // 10-19 MIST/SQUALLS/ETC
-                    { value: '19', label: '19: Funnel cloud(s)' },
-                    { value: '18', label: '18: Squalls' },
-                    { value: '17', label: '17: Thunder (no precip)' },
-                    { value: '16', label: '16: Precip within 3nm (reaching surface)' },
-                    { value: '15', label: '15: Precip beyond 3nm (reaching surface)' },
-                    { value: '14', label: '14: Precip in sight (not reaching surface)' },
-                    { value: '13', label: '13: Lightning visible, no thunder' },
-                    { value: '12', label: '12: Shallow fog (continuous)' },
-                    { value: '11', label: '11: Shallow fog (patches)' },
-                    { value: '10', label: '10: Mist' },
-
-                    // 00-09 HAZE/DUST/CLOUDS
-                    { value: '09', label: '09: Duststorm or sandstorm within sight' },
-                    { value: '08', label: '08: Dust whirls (NOT FOR MARINE USE)' },
-                    { value: '07', label: '07: Blowing spray' },
-                    { value: '06', label: '06: Widespread dust suspended in air' },
-                    { value: '05', label: '05: Dry haze' },
-                    { value: '04', label: '04: Visibility reduced by smoke' },
-                    { value: '03', label: '03: Clouds generally forming/developing' },
-                    { value: '02', label: '02: State of sky unchanged' },
-                    { value: '01', label: '01: Clouds dissolving' },
-                    { value: '00', label: '00: Cloud development not observable' }
-                ]
+                help: 'Select the most severe weather condition observed. For detail, refer to WMO code table 4677.'
             },
             { 
                 id: 'past_weather_1', 
@@ -792,3 +669,203 @@ const CLOUD_DETAILS = {
         }
     }
 };
+
+const PRESENT_WEATHER_CATEGORIES = [
+    {
+        label: "//: Not observed or not determined",
+        range: null,
+        options: [
+            { value: '//', label: '//: Not observed or not determined' }
+        ]
+    },
+    {
+        label: "95-99 Thunderstorm at time of observation",
+        range: [95, 99],
+        options: [
+            { value: '99', label: '99: Heavy thunderstorm with hail' },
+            { value: '98', label: '98: Thunderstorm with duststorm or sandstorm' },
+            { value: '97', label: '97: Heavy thunderstorm with rain/snow, no hail' },
+            { value: '96', label: '96: Slight/moderate thunderstorm with hail' },
+            { value: '95', label: '95: Slight/moderate thunderstorm with rain/snow, no hail' }
+        ]
+    },
+    {
+        label: "91-94 Thunderstorm during the past hour, but not now",
+        range: [91, 94],
+        options: [
+            { value: '94', label: '94: Mod/heavy snow/rain/hail & Thunderstorm in past hour' },
+            { value: '93', label: '93: Slight snow/rain/hail & Thunderstorm in past hour' },
+            { value: '92', label: '92: Moderate or heavy rain & Thunderstorm in past hour' },
+            { value: '91', label: '91: Slight rain & Thunderstorm in past hour' }
+        ]
+    },
+    {
+        label: "85-90 Solid precipitation in showers",
+        range: [85, 90],
+        options: [
+            { value: '90', label: '90: Shower of hail, moderate or heavy' },
+            { value: '89', label: '89: Shower of hail, slight' },
+            { value: '88', label: '88: Shower of snow/ice pellets, moderate or heavy' },
+            { value: '87', label: '87: Shower of snow/ice pellets, slight' },
+            { value: '86', label: '86: Shower of snow, moderate or heavy' },
+            { value: '85', label: '85: Shower of snow, slight' }
+        ]
+    },
+    {
+        label: "80-84 Rain showers",
+        range: [80, 84],
+        options: [
+            { value: '84', label: '84: Shower of rain and snow mixed, moderate or heavy' },
+            { value: '83', label: '83: Shower of rain and snow mixed, slight' },
+            { value: '82', label: '82: Violent rain shower' },
+            { value: '81', label: '81: Moderate or heavy rain shower' },
+            { value: '80', label: '80: Slight rain shower' }
+        ]
+    },
+    {
+        label: "70-79 Solid precipitation not falling as showers",
+        range: [70, 79],
+        options: [
+            { value: '79', label: '79: Ice pellets' },
+            { value: '78', label: '78: Isolated star-like snow crystals' },
+            { value: '77', label: '77: Snow grains' },
+            { value: '76', label: '76: Diamond dust' },
+            { value: '75', label: '75: Heavy snow in flakes (Continuous)' },
+            { value: '74', label: '74: Heavy snow in flakes (Intermittent)' },
+            { value: '73', label: '73: Moderate snow in flakes (Continuous)' },
+            { value: '72', label: '72: Moderate snow in flakes (Intermittent)' },
+            { value: '71', label: '71: Slight snow in flakes (Continuous)' },
+            { value: '70', label: '70: Slight snow in flakes (Intermittent)' }
+        ]
+    },
+    {
+        label: "60-69 Rain (not falling as showers)",
+        range: [60, 69],
+        options: [
+            { value: '69', label: '69: Rain/drizzle with snow, moderate or heavy' },
+            { value: '68', label: '68: Rain/drizzle with snow, slight' },
+            { value: '67', label: '67: Freezing rain, moderate or heavy' },
+            { value: '66', label: '66: Freezing rain, slight' },
+            { value: '65', label: '65: Heavy rain (Continuous)' },
+            { value: '64', label: '64: Heavy rain (Intermittent)' },
+            { value: '63', label: '63: Moderate rain (Continuous)' },
+            { value: '62', label: '62: Moderate rain (Intermittent)' },
+            { value: '61', label: '61: Slight rain (Continuous)' },
+            { value: '60', label: '60: Slight rain (Intermittent)' }
+        ]
+    },
+    {
+        label: "50-59 Drizzle",
+        range: [50, 59],
+        options: [
+            { value: '59', label: '59: Drizzle and rain mixed, moderate or heavy' },
+            { value: '58', label: '58: Drizzle and rain mixed, slight' },
+            { value: '57', label: '57: Freezing drizzle, moderate or heavy' },
+            { value: '56', label: '56: Freezing drizzle, slight' },
+            { value: '55', label: '55: Heavy drizzle (Continuous)' },
+            { value: '54', label: '54: Heavy drizzle (Intermittent)' },
+            { value: '53', label: '53: Moderate drizzle (Continuous)' },
+            { value: '52', label: '52: Moderate drizzle (Intermittent)' },
+            { value: '51', label: '51: Slight drizzle (Continuous)' },
+            { value: '50', label: '50: Slight drizzle (Intermittent)' }
+        ]
+    },
+    {
+        label: "40-49 Fog at the time of observation",
+        range: [40, 49],
+        options: [
+            { value: '49', label: '49: Fog, depositing rime (Sky invisible)' },
+            { value: '48', label: '48: Fog, depositing rime (Sky visible)' },
+            { value: '47', label: '47: Fog, begun/thickened in past hour (Sky invisible)' },
+            { value: '46', label: '46: Fog, begun/thickened in past hour (Sky visible)' },
+            { value: '45', label: '45: Fog, no change in past hour (Sky invisible)' },
+            { value: '44', label: '44: Fog, no change in past hour (Sky visible)' },
+            { value: '43', label: '43: Fog, thinner in past hour (Sky invisible)' },
+            { value: '42', label: '42: Fog, thinner in past hour (Sky visible)' },
+            { value: '41', label: '41: Fog in patches' },
+            { value: '40', label: '40: Fog at a distance' }
+        ]
+    },
+    {
+        label: "30-39 Dust/Sand/Snow storms",
+        range: [30, 39],
+        options: [
+            { value: '39', label: '39: Heavy blowing snow (high)' },
+            { value: '38', label: '38: Slight/moderate blowing snow (high)' },
+            { value: '37', label: '37: Heavy drifting snow (low)' },
+            { value: '36', label: '36: Slight/moderate drifting snow (low)' },
+            { value: '35', label: '35: Heavy dust/sandstorm (increasing)' },
+            { value: '34', label: '34: Heavy dust/sandstorm (unchanging)' },
+            { value: '33', label: '33: Heavy dust/sandstorm (decreasing)' },
+            { value: '32', label: '32: Slight/moderate dust/sandstorm (increasing)' },
+            { value: '31', label: '31: Slight/moderate dust/sandstorm (unchanging)' },
+            { value: '30', label: '30: Slight/moderate dust/sandstorm (decreasing)' }
+        ]
+    },
+    {
+        label: "20-29 Phenomena in past hour but not now",
+        range: [20, 29],
+        options: [
+            { value: '29', label: '29: Thunderstorm (with/without precip)' },
+            { value: '28', label: '28: Fog' },
+            { value: '27', label: '27: Shower(s) of hail/rain mixed' },
+            { value: '26', label: '26: Shower(s) of snow/rain mixed' },
+            { value: '25', label: '25: Shower(s) of rain' },
+            { value: '24', label: '24: Freezing drizzle or freezing rain' },
+            { value: '23', label: '23: Rain and snow mixed, or ice pellets' },
+            { value: '22', label: '22: Snow' },
+            { value: '21', label: '21: Rain (not freezing)' },
+            { value: '20', label: '20: Drizzle (not freezing) or snow grains' }
+        ]
+    },
+    {
+        label: "17-19 Squalls, Funnel clouds, Thunder",
+        range: [17, 19],
+        options: [
+            { value: '19', label: '19: Funnel cloud(s)' },
+            { value: '18', label: '18: Squalls' },
+            { value: '17', label: '17: Thunder (no precip)' }
+        ]
+    },
+    {
+        label: "13-16 Phenomena within sight but not at ship",
+        range: [13, 16],
+        options: [
+            { value: '16', label: '16: Precip within 3nm (reaching surface)' },
+            { value: '15', label: '15: Precip beyond 3nm (reaching surface)' },
+            { value: '14', label: '14: Precip in sight (not reaching surface)' },
+            { value: '13', label: '13: Lightning visible, no thunder' }
+        ]
+    },
+    {
+        label: "10-12 Mist and shallow fog",
+        range: [10, 12],
+        options: [
+            { value: '12', label: '12: Shallow fog (continuous)' },
+            { value: '11', label: '11: Shallow fog (patches)' },
+            { value: '10', label: '10: Mist' }
+        ]
+    },
+    {
+        label: "04-09 Haze, dust, sand or smoke",
+        range: [4, 9],
+        options: [
+            { value: '09', label: '09: Duststorm or sandstorm within sight' },
+            { value: '08', label: '08: Dust whirls (NOT FOR MARINE USE)' },
+            { value: '07', label: '07: Blowing spray' },
+            { value: '06', label: '06: Widespread dust suspended in air' },
+            { value: '05', label: '05: Dry haze' },
+            { value: '04', label: '04: Visibility reduced by smoke' }
+        ]
+    },
+    {
+        label: "00-03 Change of sky during past hour",
+        range: [0, 3],
+        options: [
+            { value: '03', label: '03: Clouds generally forming/developing' },
+            { value: '02', label: '02: State of sky unchanged' },
+            { value: '01', label: '01: Clouds dissolving' },
+            { value: '00', label: '00: Cloud development not observable' }
+        ]
+    }
+];
