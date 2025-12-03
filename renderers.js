@@ -752,7 +752,7 @@ const Renderers = {
         container.appendChild(corrInput.wrapper);
 
         // 3. Height of Barometer
-        const heightInput = createInput('pt_height', 'Height of Barometer [0 - 60 m]', 'number', '100%', 'Height above sea level. 0 means already corrected to MSL.', 0, 60, '0.1');
+        const heightInput = createInput('pt_height', 'Height of Barometer [0 - 60 m]', 'number', '100%', 'Height above sea level. 0 means your reading is already corrected to MSL.', 0, 60, '0.1');
         // Default to 0 if empty? The user said "0 (as the default) means...". 
         // But if it's empty in formData, we might want to show 0 or treat as 0.
         // Let's set default value in UI if empty.

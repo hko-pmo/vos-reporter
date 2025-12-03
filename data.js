@@ -213,8 +213,8 @@ const REPORT_STRUCTURE = [
         customComponent: 'pressure-tendency-input',
         fields: [
             { id: 'pressure_tendency_code', type: 'computed', label: 'Code' },
-            { id: 'pt_correction', type: 'number', label: 'Barometer Correction', hidden: true, persist: true },
-            { id: 'pt_height', type: 'number', label: 'Height of Barometer', hidden: true }
+            { id: 'pt_correction', type: 'number', label: 'Barometer Correction', hidden: true, persist: true, excludeFromCode: true },
+            { id: 'pt_height', type: 'number', label: 'Height of Barometer', hidden: true, excludeFromCode: true }
         ]
     },
     {

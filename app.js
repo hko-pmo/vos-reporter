@@ -377,7 +377,7 @@ function renderReviewScreen() {
     // Mail Button
     const mailBtn = document.createElement('button');
     mailBtn.className = 'mail-btn';
-    mailBtn.textContent = 'Send via Email';
+    mailBtn.textContent = 'Send via Email (will launch mail client)';
     mailBtn.onclick = () => {
         const recipient = store.getFormData()['email_recipient'] || '';
         const subject = 'OBS email';
