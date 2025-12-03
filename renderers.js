@@ -772,7 +772,7 @@ const Renderers = {
         debugBox.style.borderRadius = '4px';
         debugBox.style.fontSize = '0.9rem';
         debugBox.style.color = '#0050b3';
-        debugBox.textContent = 'Final corrected pressure: -- hPa';
+        debugBox.textContent = 'Final corrected MSL pressure: -- hPa';
         container.appendChild(debugBox);
 
         // 4. Tendency Characteristic
@@ -887,13 +887,13 @@ const Renderers = {
                 }
 
                 // Update Debug Box
-                debugBox.textContent = `Final corrected pressure: ${finalPressure.toFixed(1)} hPa`;
+                debugBox.textContent = `Final corrected MSL pressure: ${finalPressure.toFixed(1)} hPa`;
 
                 // Generate Code 4PPPP
                 const pVal = Math.round(finalPressure * 10) % 10000;
                 code += `4${pVal.toString().padStart(4, '0')}`;
             } else {
-                debugBox.textContent = 'Final corrected pressure: -- hPa';
+                debugBox.textContent = 'Final corrected MSL pressure: -- hPa';
                 code += '4////';
             }
 
@@ -1289,7 +1289,7 @@ const Renderers = {
     renderWindWavesComponent: (container, group, store, updatePreview) => {
         const formData = store.getFormData();
 
-        const createInput = (id, label, type = 'number', width = '100%', help = '', min = undefined, max = undefined) => {
+        const createInput = (id, label, type = 'number', width = '100%', help = '', min = undefined, max = undefined, step = '1') => {
             const wrapper = document.createElement('div');
             wrapper.className = 'input-group';
             
@@ -1303,6 +1303,7 @@ const Renderers = {
             inp.id = id;
             inp.style.width = width;
             inp.value = formData[id] || '';
+            inp.step = step;
             if (min !== undefined) inp.min = min;
             if (max !== undefined) inp.max = max;
 
@@ -1398,7 +1399,7 @@ const Renderers = {
         container.appendChild(periodWrapper);
 
         // Height: 0-49. / allowed.
-        const heightInput = createInput('wave_height', 'Height (HwHw) [0.0 - 49.0 Meters]', 'number', '100%', 'Input in meters (e.g. 2.5). Leave empty for Not Determined.', 0, 49);
+        const heightInput = createInput('wave_height', 'Height (HwHw) [0.0 - 49.0 Meters]', 'number', '100%', 'Input in meters (e.g. 2.5). Leave empty for Not Determined.', 0, 49, '0.1');
         container.appendChild(heightInput.wrapper);
 
         function updateValues() {
@@ -1466,12 +1467,12 @@ const Renderers = {
             return { wrapper, sel };
         };
 
-        const sourceSelect = createSelect('ice_source', 'Source', [
+        const sourceSelect = createSelect('ice_source', 'Cause', [
             { value: '1', label: '1: Icing from ocean spray' },
             { value: '2', label: '2: Icing from fog' },
-            { value: '3', label: '3: Spray + Fog' },
-            { value: '4', label: '4: Rain' },
-            { value: '5', label: '5: Spray + Rain' },
+            { value: '3', label: '3: Icing from spray + fog' },
+            { value: '4', label: '4: Icing from rain' },
+            { value: '5', label: '5: Icing from spray + rain' },
             { value: '/', label: '/: Not determined' }
         ]);
         container.appendChild(sourceSelect.wrapper);
@@ -1492,11 +1493,11 @@ const Renderers = {
         container.appendChild(thickWrapper);
 
         const rateSelect = createSelect('ice_rate', 'Rate', [
-            { value: '0', label: '0: Stable' },
-            { value: '1', label: '1: Slight buildup' },
-            { value: '2', label: '2: Rapid' },
-            { value: '3', label: '3: Very rapid' },
-            { value: '4', label: '4: Melting' },
+            { value: '0', label: '0: Ice not building up' },
+            { value: '1', label: '1: Ice building up slowly' },
+            { value: '2', label: '2: Ice building up rapidly' },
+            { value: '3', label: '3: Ice melting or breaking up slowly' },
+            { value: '4', label: '4: Ice melting or breaking up rapidly' },
             { value: '/', label: '/: Not determined' }
         ]);
         container.appendChild(rateSelect.wrapper);

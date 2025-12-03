@@ -442,18 +442,33 @@ function renderReviewScreen() {
     startOverBtn.textContent = 'Start New Report';
     startOverBtn.onclick = () => {
         if(confirm('Start a new report? Current data will be lost.')) {
-            // Keep callsign
+            // Preserve persisted fields
             const formData = store.getFormData();
-            const callsign = formData['callsign'];
+            const preservedData = {};
+            
+            // List of keys that should be preserved across reports
+            const preservedKeys = [
+                'callsign', 
+                'email_recipient', 
+                'wind_indicator', 
+                'th_mode', 
+                'sst_method', 
+                'pt_correction'
+            ];
+
+            preservedKeys.forEach(key => {
+                if (formData[key] !== undefined) {
+                    preservedData[key] = formData[key];
+                }
+            });
             
             // Reset store
             const newState = {
                 currentStepIndex: 0,
-                formData: {},
+                formData: preservedData,
                 returnToReview: false,
                 isReviewMode: false
             };
-            if(callsign) newState.formData['callsign'] = callsign;
             
             store.setState(newState);
             

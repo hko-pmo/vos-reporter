@@ -111,13 +111,10 @@ const REPORT_STRUCTURE = [
             { id: 'indicator_4', type: 'static', value: '4', label: 'Precipitation Indicator (Fixed)', hidden: true },
             { 
                 id: 'weather_indicator', 
-                type: 'select', 
+                type: 'static', 
+                value: '1',
                 label: 'Weather Data Indicator (ix)', 
-                width: 1,
-                options: [
-                    { value: '1', label: '1: Weather data included (to be input later)' },
-                    { value: '2', label: '2: Weather data omitted' }
-                ]
+                hidden: true
             },
             { 
                 id: 'cloud_base', 
@@ -125,7 +122,7 @@ const REPORT_STRUCTURE = [
                 label: 'Visual Estimate of Height of Cloud Base (h)', 
                 width: 1,
                 default: '/',
-                help: '0-7: <6500ft (Cu, St, Sc, Cb, Ns). 8-9: >6500ft (As, Ac, Ns) or >8200ft (Ci, Cs, Cc). /: Obscured or unknown.',
+                help: '0-7: <2000m (Cu, St, Sc, Cb, Ns). 8-9: >2000m (As, Ac, Ns) or >2500m (Ci, Cs, Cc). /: Obscured or unknown.',
                 options: [
                     { value: '0', label: '0: 0 to 50m' },
                     { value: '1', label: '1: 50 to 100m' },
@@ -232,7 +229,7 @@ const REPORT_STRUCTURE = [
                 width: 2, 
                 pad: true, 
                 default: '//',
-                help: 'Select the most severe weather condition observed. For detail, refer to WMO code table 4677.'
+                help: 'Select the most severe weather condition observed. For detail, refer to WMO code table 4677. If no significant weather, select group 00-03.'
             },
             { 
                 id: 'past_weather_1', 
@@ -444,17 +441,18 @@ const REPORT_STRUCTURE = [
                 label: 'Concentration (ci)', 
                 width: 1,
                 default: '/',
+                help: 'If ship in ice or within 0.5 nm of the ice edge, select 2-9',
                 options: [
                     { value: '0', label: '0: No sea ice' },
-                    { value: '1', label: '1: Ship in open water' },
-                    { value: '2', label: '2: 1/10 to 3/10' },
-                    { value: '3', label: '3: 4/10 to 6/10' },
-                    { value: '4', label: '4: 7/10 to 8/10' },
-                    { value: '5', label: '5: 9/10' },
-                    { value: '6', label: '6: 10/10 (Consolidated)' },
-                    { value: '7', label: '7: Ice cover not continuous' },
-                    { value: '8', label: '8: Ice cover continuous' },
-                    { value: '9', label: '9: Obscured/Indiscernible' },
+                    { value: '1', label: '1: Ship in open lead more than 1 nm wide, or ship in fast ice with boundary beyond limit of visibility' },
+                    { value: '2', label: '2: Sea ice present in concentrations less than 3/8; open water or very open pack ice' },
+                    { value: '3', label: '3: 3/8 to less than 6/8; open pack ice' },
+                    { value: '4', label: '4: 6/8 to less than 7/8; close pack ice' },
+                    { value: '5', label: '5: 7/8 to less than 8/8); very close pack ice' },
+                    { value: '6', label: '6: Strips and patches of pack ice with open water between' },
+                    { value: '7', label: '7: Strips and patches of close or very close pack ice with areas of lesser concentration between' },
+                    { value: '8', label: '8: Fast ice with open water, very open or open pack ice to seaward of the ice boundary' },
+                    { value: '9', label: '9: Fast ice with close or very close pack ice to seaward of the ice boundary' },
                     { value: '/', label: '/: Unable to report' }
                 ]
             },
@@ -468,13 +466,13 @@ const REPORT_STRUCTURE = [
                     { value: '0', label: '0: New ice only' },
                     { value: '1', label: '1: Nilas (< 10cm)' },
                     { value: '2', label: '2: Young ice (10-30cm)' },
-                    { value: '3', label: '3: Grey ice (10-15cm)' },
-                    { value: '4', label: '4: Grey-white ice (15-30cm)' },
-                    { value: '5', label: '5: First-year ice (30-200cm)' },
-                    { value: '6', label: '6: Old ice' },
-                    { value: '7', label: '7: Land-fast ice' },
-                    { value: '8', label: '8: Slate/Hummocked ice' },
-                    { value: '9', label: '9: Icebergs' },
+                    { value: '3', label: '3: Predominantly new and/or young ice with some first year ice' },
+                    { value: '4', label: '4: Predominantly thin first-year ice with some new and/or young ice' },
+                    { value: '5', label: '5: All thin first-year ice (30-70 cm) ' },
+                    { value: '6', label: '6: Predominantly medium first-year ice (70-120 cm) and thick first-year ice (>120 cm) with some thinner (younger) first-year ice ' },
+                    { value: '7', label: '7: All medium and thick first-year ice' },
+                    { value: '8', label: '8: Predominantly medium and thick first-year ice with some old ice (usually > 2 m) ' },
+                    { value: '9', label: '9: Predominantly old ice' },
                     { value: '/', label: '/: Unable to report' }
                 ]
             },
@@ -486,11 +484,15 @@ const REPORT_STRUCTURE = [
                 default: '/',
                 options: [
                     { value: '0', label: '0: None' },
-                    { value: '1', label: '1: 1-5 icebergs' },
-                    { value: '2', label: '2: 6-10 icebergs' },
-                    { value: '3', label: '3: 11-20 icebergs' },
-                    { value: '4', label: '4: > 20 icebergs' },
-                    { value: '5', label: '5: Growlers/Bergy bits' },
+                    { value: '1', label: '1: 1-5 icebergs, no growlers or bergy bits' },
+                    { value: '2', label: '2: 6-10 icebergs, no growlers or bergy bits' },
+                    { value: '3', label: '3: 11-20 icebergs, no growlers or bergy bits ' },
+                    { value: '4', label: '4: Up to and including 10 growlers and bergy bits - no icebergs' },
+                    { value: '5', label: '5: More than 10 growlers and bergy bits - no icebergs ' },
+                    { value: '6', label: '6: More than 10 growlers and bergy bits - no icebergs ' },
+                    { value: '7', label: '7: 6-10 icebergs with growlers and bergy bits' },
+                    { value: '8', label: '8: 11-20 icebergs with growlers and bergy bits ' },
+                    { value: '9', label: '9: More than 20 icebergs with growlers and bergy bits - a major hazard to navigation' },
                     { value: '/', label: '/: Unable to report' }
                 ]
             },
@@ -501,16 +503,16 @@ const REPORT_STRUCTURE = [
                 width: 1,
                 default: '/',
                 options: [
-                    { value: '0', label: '0: Ship in ice' },
-                    { value: '1', label: '1: NE' },
-                    { value: '2', label: '2: E' },
-                    { value: '3', label: '3: SE' },
-                    { value: '4', label: '4: S' },
-                    { value: '5', label: '5: SW' },
-                    { value: '6', label: '6: W' },
-                    { value: '7', label: '7: NW' },
-                    { value: '8', label: '8: N' },
-                    { value: '9', label: '9: Parallel to course' },
+                    { value: '0', label: '0: Ship in shore or flaw lead' },
+                    { value: '1', label: '1: Principal ice edge towards NE' },
+                    { value: '2', label: '2: Principal ice edge towards E' },
+                    { value: '3', label: '3: Principal ice edge towards SE' },
+                    { value: '4', label: '4: Principal ice edge towards S' },
+                    { value: '5', label: '5: Principal ice edge towards SW' },
+                    { value: '6', label: '6: Principal ice edge towards W' },
+                    { value: '7', label: '7: Principal ice edge towards NW' },
+                    { value: '8', label: '8: Principal ice edge towards N' },
+                    { value: '9', label: '9: Not determined (ship in ice) ' },
                     { value: '/', label: '/: Unable to report' }
                 ]
             },
@@ -520,17 +522,18 @@ const REPORT_STRUCTURE = [
                 label: 'Present Ice Situation Trend (zi)', 
                 width: 1,
                 default: '/',
+                help: 'If ship in ice, select 1-9',
                 options: [
-                    { value: '0', label: '0: Improving' },
-                    { value: '1', label: '1: Stationary' },
-                    { value: '2', label: '2: Worsening' },
-                    { value: '3', label: '3: Ice breaking up' },
-                    { value: '4', label: '4: Ice opening' },
-                    { value: '5', label: '5: Ice closing' },
-                    { value: '6', label: '6: Ice freezing' },
-                    { value: '7', label: '7: Ice drift increasing' },
-                    { value: '8', label: '8: Ice drift decreasing' },
-                    { value: '9', label: '9: Ice drift changing' },
+                    { value: '0', label: '0: Ship in open water with floating ice in sight' },
+                    { value: '1', label: '1: Ship in easily penetrable ice; conditions improving' },
+                    { value: '2', label: '2: Ship in easily penetrable ice; conditions not changing' },
+                    { value: '3', label: '3: Ship in easily penetrable ice; conditions worsening' },
+                    { value: '4', label: '4: Ship in ice difficult to penetrate; conditions improving' },
+                    { value: '5', label: '5: Ship in ice difficult to penetrate; conditions not changing' },
+                    { value: '6', label: '6: Ice forming and floes freezing together' },
+                    { value: '7', label: '7: Ice under slight pressure' },
+                    { value: '8', label: '8: Ice under moderate or severe pressure' },
+                    { value: '9', label: '9: Ship beset' },
                     { value: '/', label: '/: Unable to report' }
                 ]
             }
