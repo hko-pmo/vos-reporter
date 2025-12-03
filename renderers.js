@@ -132,6 +132,69 @@ const Renderers = {
             });
         });
 
+        // --- Ship Course & Speed ---
+        const marineHeader = document.createElement('h3');
+        marineHeader.textContent = 'Ship Course & Speed';
+        marineHeader.style.marginTop = '1.5rem';
+        marineHeader.style.marginBottom = '0.5rem';
+        marineHeader.style.fontSize = '1rem';
+        marineHeader.style.borderBottom = '1px solid #eee';
+        container.appendChild(marineHeader);
+
+        const createSelect = (id, label, options) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-group';
+            const lbl = document.createElement('label');
+            lbl.textContent = label;
+            wrapper.appendChild(lbl);
+            
+            const sel = document.createElement('select');
+            sel.id = id;
+            options.forEach(opt => {
+                const o = document.createElement('option');
+                o.value = opt.value;
+                o.textContent = opt.label;
+                sel.appendChild(o);
+            });
+            sel.value = formData[id] || '/';
+            sel.addEventListener('change', (e) => {
+                store.updateFormData(id, e.target.value);
+                updatePreview(group);
+            });
+            wrapper.appendChild(sel);
+            return wrapper;
+        };
+
+        const courseSelect = createSelect('course', 'Ship Course (Ds)', [
+            { value: '/', label: '/: Not determined' },
+            { value: '0', label: '0: Stationary' },
+            { value: '1', label: '1: NE' },
+            { value: '2', label: '2: E' },
+            { value: '3', label: '3: SE' },
+            { value: '4', label: '4: S' },
+            { value: '5', label: '5: SW' },
+            { value: '6', label: '6: W' },
+            { value: '7', label: '7: NW' },
+            { value: '8', label: '8: N' },
+            { value: '9', label: '9: Unknown' }
+        ]);
+        container.appendChild(courseSelect);
+
+        const speedSelect = createSelect('speed', 'Ship Speed (Vs)', [
+            { value: '/', label: '/: Not determined' },
+            { value: '0', label: '0: 0 knots' },
+            { value: '1', label: '1: 1-5 knots' },
+            { value: '2', label: '2: 6-10 knots' },
+            { value: '3', label: '3: 11-15 knots' },
+            { value: '4', label: '4: 16-20 knots' },
+            { value: '5', label: '5: 21-25 knots' },
+            { value: '6', label: '6: 26-30 knots' },
+            { value: '7', label: '7: 31-35 knots' },
+            { value: '8', label: '8: 36-40 knots' },
+            { value: '9', label: '9: >40 knots' }
+        ]);
+        container.appendChild(speedSelect);
+
         function updatePositionValues() {
             const fd = store.getFormData();
             const latDeg = parseFloat(fd['pos_lat_deg']);
@@ -632,7 +695,7 @@ const Renderers = {
     renderPressureTendencyComponent: (container, group, store, updatePreview) => {
         const formData = store.getFormData();
 
-        const createInput = (id, label, type = 'number', width = '100%', help = '', min = undefined, max = undefined) => {
+        const createInput = (id, label, type = 'number', width = '100%', help = '', min = undefined, max = undefined, step = '0.1') => {
             const wrapper = document.createElement('div');
             wrapper.className = 'input-group';
             
@@ -646,7 +709,7 @@ const Renderers = {
             inp.id = id;
             inp.style.width = width;
             inp.value = formData[id] || '';
-            inp.step = '0.1';
+            inp.step = step;
             if (min !== undefined) inp.min = min;
             if (max !== undefined) inp.max = max;
 
@@ -677,9 +740,42 @@ const Renderers = {
             return { wrapper, inp };
         };
 
-        const pressInput = createInput('pt_pressure', 'Pressure [860.0 - 1070.0 hPa]', 'number', '100%', 'e.g. 1014.2. Leave empty if not measured.', 860.0, 1070.0);
+        // 1. Barometer Reading
+        const pressInput = createInput('pt_pressure', 'Barometer reading [860.0 - 1070.0 hPa]', 'number', '100%', 'e.g. 1014.2. Leave empty if not measured.', 860.0, 1070.0);
         container.appendChild(pressInput.wrapper);
 
+        // 2. Barometer Correction
+        const corrInput = createInput('pt_correction', 'Barometer (instrument) correction [-8.0 to +8.0 hPa]', 'number', '100%', 'Correction to remove systematic bias.', -8.0, 8.0);
+        corrInput.inp.addEventListener('change', (e) => {
+            localStorage.setItem('vos_pt_correction', e.target.value);
+        });
+        container.appendChild(corrInput.wrapper);
+
+        // 3. Height of Barometer
+        const heightInput = createInput('pt_height', 'Height of Barometer [0 - 60 m]', 'number', '100%', 'Height above sea level. 0 means already corrected to MSL.', 0, 60, '0.1');
+        // Default to 0 if empty? The user said "0 (as the default) means...". 
+        // But if it's empty in formData, we might want to show 0 or treat as 0.
+        // Let's set default value in UI if empty.
+        if (!formData['pt_height']) {
+            heightInput.inp.value = '0';
+            store.updateFormData('pt_height', '0');
+        }
+        container.appendChild(heightInput.wrapper);
+
+        // Debug Box for Corrected Pressure
+        const debugBox = document.createElement('div');
+        debugBox.style.marginTop = '1rem';
+        debugBox.style.marginBottom = '1rem';
+        debugBox.style.padding = '0.5rem';
+        debugBox.style.backgroundColor = '#e6f7ff'; // Light blue
+        debugBox.style.border = '1px solid #91d5ff';
+        debugBox.style.borderRadius = '4px';
+        debugBox.style.fontSize = '0.9rem';
+        debugBox.style.color = '#0050b3';
+        debugBox.textContent = 'Final corrected pressure: -- hPa';
+        container.appendChild(debugBox);
+
+        // 4. Tendency Characteristic
         const charWrapper = document.createElement('div');
         charWrapper.className = 'input-group';
         const charLabel = document.createElement('label');
@@ -715,7 +811,8 @@ const Renderers = {
         charWrapper.appendChild(charSelect);
         container.appendChild(charWrapper);
 
-        const amountInput = createInput('pt_amount', 'Amount of Change [0.0 - 50.0 hPa]', 'number', '100%', 'Change of pressure in last 3 hours, e.g. 1.4. No negative numbers. Use "Characteristic" to indicate sign.', 0.0, 50.0);
+        // 5. Amount of Change
+        const amountInput = createInput('pt_amount', 'Amount of Change [0.0 - 50.0 hPa]', 'number', '100%', 'Change of pressure in last 3 hours, e.g. 1.4. No negative numbers. Use "Characteristic" to indicate minus sign.', 0.0, 50.0);
         container.appendChild(amountInput.wrapper);
 
         function updateVisibility() {
@@ -730,18 +827,73 @@ const Renderers = {
             }
         }
 
+        function calculateMSLP(P_hpa, h_m, T_c) {
+            // Constants
+            const G = 9.80665;       // m/s^2
+            const R_D = 287.05;      // J/(kg K)
+            const T0_K = 273.15;
+            const STANDARD_LAPSE = 0.0065;  // K/m
+
+            // convert station temperature to Kelvin
+            const T_k = T_c + T0_K;
+
+            // approximate mean layer temperature (K) using standard lapse rate
+            const T_mean_k = T_k + 0.5 * STANDARD_LAPSE * h_m;
+
+            // exponent in hypsometric equation
+            const exponent = (G * h_m) / (R_D * T_mean_k);
+
+            // reduced pressure
+            const msl_pressure_hpa = P_hpa * Math.exp(exponent);
+
+            return msl_pressure_hpa;
+        }
+
         function updateValues() {
             const fd = store.getFormData();
             const pressVal = parseFloat(fd['pt_pressure']);
+            const corrVal = parseFloat(fd['pt_correction']);
+            const heightVal = parseFloat(fd['pt_height']);
+            const airTempVal = parseFloat(fd['th_air_val']); // From previous section
+
             const charVal = fd['pt_char'] || 'not_measured';
             const amountVal = parseFloat(fd['pt_amount']);
 
             let code = '';
+            let finalPressure = NaN;
 
             if (!isNaN(pressVal)) {
-                const pVal = Math.round(pressVal * 10) % 10000;
+                // 1. Apply Instrument Correction
+                let pStation = pressVal;
+                if (!isNaN(corrVal)) {
+                    pStation += corrVal;
+                }
+
+                // 2. Apply Height Correction (Reduction to MSL)
+                let h = 0;
+                if (!isNaN(heightVal)) {
+                    h = heightVal;
+                }
+
+                if (h > 0) {
+                    // Need Air Temp. Default to 20 if missing.
+                    let t = 20.0;
+                    if (!isNaN(airTempVal)) {
+                        t = airTempVal;
+                    }
+                    finalPressure = calculateMSLP(pStation, h, t);
+                } else {
+                    finalPressure = pStation;
+                }
+
+                // Update Debug Box
+                debugBox.textContent = `Final corrected pressure: ${finalPressure.toFixed(1)} hPa`;
+
+                // Generate Code 4PPPP
+                const pVal = Math.round(finalPressure * 10) % 10000;
                 code += `4${pVal.toString().padStart(4, '0')}`;
             } else {
+                debugBox.textContent = 'Final corrected pressure: -- hPa';
                 code += '4////';
             }
 

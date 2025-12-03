@@ -3,6 +3,7 @@ const REPORT_STRUCTURE = [
     {
         id: 'identification',
         name: 'Identification',
+        description: "This webpage is designed for Voluntary Observing Ships to compile FM13 SHIP weather reports. Follow the steps to complete the reports. Some steps can be skipped. At the end you will be redirected to send the report via email. When reloading the page, some settings, such as call sign, are automatically loaded. For any suggestions and feedbacks, please send them to hkopmo@hko.gov.hk (this is NOT the report recipient address).",
         section: 0,
         mandatory: true,
         fields: [
@@ -36,7 +37,7 @@ const REPORT_STRUCTURE = [
     },
     {
         id: 'position',
-        name: 'Position',
+        name: 'Position and Ship Course',
         section: 0,
         mandatory: true,
         customComponent: 'position-input',
@@ -50,7 +51,53 @@ const REPORT_STRUCTURE = [
 
             // Longitude Group: QcLoLoLoLo
             { id: 'quadrant_final', type: 'computed', width: 1, label: 'Quadrant' },
-            { id: 'long_final', type: 'computed', width: 4, pad: true, label: 'Longitude' }
+            { id: 'long_final', type: 'computed', width: 4, pad: true, label: 'Longitude' },
+
+            // Spacer
+            { id: 'marine_spacer', type: 'static', value: ' ' },
+
+            // Ship Course & Speed Group: 222DsVs
+            { id: 'indicator_222', type: 'static', value: '222', label: 'Indicator', hidden: true },
+            { 
+                id: 'course', 
+                type: 'select', 
+                label: 'Ship Course (Ds)', 
+                width: 1,
+                default: '/',
+                options: [
+                    { value: '/', label: '/: Not determined' },
+                    { value: '0', label: '0: Stationary' },
+                    { value: '1', label: '1: NE' },
+                    { value: '2', label: '2: E' },
+                    { value: '3', label: '3: SE' },
+                    { value: '4', label: '4: S' },
+                    { value: '5', label: '5: SW' },
+                    { value: '6', label: '6: W' },
+                    { value: '7', label: '7: NW' },
+                    { value: '8', label: '8: N' },
+                    { value: '9', label: '9: Unknown' }
+                ]
+            },
+            { 
+                id: 'speed', 
+                type: 'select', 
+                label: 'Ship Speed (Vs)', 
+                width: 1,
+                default: '/',
+                options: [
+                    { value: '/', label: '/: Not determined' },
+                    { value: '0', label: '0: 0 knots' },
+                    { value: '1', label: '1: 1-5 knots' },
+                    { value: '2', label: '2: 6-10 knots' },
+                    { value: '3', label: '3: 11-15 knots' },
+                    { value: '4', label: '4: 16-20 knots' },
+                    { value: '5', label: '5: 21-25 knots' },
+                    { value: '6', label: '6: 26-30 knots' },
+                    { value: '7', label: '7: 31-35 knots' },
+                    { value: '8', label: '8: 36-40 knots' },
+                    { value: '9', label: '9: >40 knots' }
+                ]
+            }
         ]
     },
 
@@ -160,12 +207,14 @@ const REPORT_STRUCTURE = [
     },
     {
         id: 'pressure_tendency_combined',
-        name: 'Pressure & Tendency',
+        name: 'Mean Sea Level Pressure & Tendency',
         section: 1,
         mandatory: false,
         customComponent: 'pressure-tendency-input',
         fields: [
-            { id: 'pressure_tendency_code', type: 'computed', label: 'Code' }
+            { id: 'pressure_tendency_code', type: 'computed', label: 'Code' },
+            { id: 'pt_correction', type: 'number', label: 'Barometer Correction', hidden: true, persist: true },
+            { id: 'pt_height', type: 'number', label: 'Height of Barometer', hidden: true }
         ]
     },
     {
@@ -343,55 +392,6 @@ const REPORT_STRUCTURE = [
     
     // --- SECTION 2: MARINE DATA ---
     {
-        id: 'marine_header',
-        name: 'Ship Course & Speed',
-        section: 2,
-        mandatory: false,
-        fields: [
-            { id: 'indicator_222', type: 'static', value: '222', label: 'Indicator', hidden: true },
-            { 
-                id: 'course', 
-                type: 'select', 
-                label: 'Ship Course (Ds)', 
-                width: 1,
-                default: '/',
-                options: [
-                    { value: '/', label: '/: Not determined' },
-                    { value: '0', label: '0: Stationary' },
-                    { value: '1', label: '1: NE' },
-                    { value: '2', label: '2: E' },
-                    { value: '3', label: '3: SE' },
-                    { value: '4', label: '4: S' },
-                    { value: '5', label: '5: SW' },
-                    { value: '6', label: '6: W' },
-                    { value: '7', label: '7: NW' },
-                    { value: '8', label: '8: N' },
-                    { value: '9', label: '9: Unknown' }
-                ]
-            },
-            { 
-                id: 'speed', 
-                type: 'select', 
-                label: 'Ship Speed (Vs)', 
-                width: 1,
-                default: '/',
-                options: [
-                    { value: '/', label: '/: Not determined' },
-                    { value: '0', label: '0: 0 knots' },
-                    { value: '1', label: '1: 1-5 knots' },
-                    { value: '2', label: '2: 6-10 knots' },
-                    { value: '3', label: '3: 11-15 knots' },
-                    { value: '4', label: '4: 16-20 knots' },
-                    { value: '5', label: '5: 21-25 knots' },
-                    { value: '6', label: '6: 26-30 knots' },
-                    { value: '7', label: '7: 31-35 knots' },
-                    { value: '8', label: '8: 36-40 knots' },
-                    { value: '9', label: '9: >40 knots' }
-                ]
-            }
-        ]
-    },
-    {
         id: 'sea_temp',
         name: 'Sea Surface Temperature',
         section: 2,
@@ -443,7 +443,7 @@ const REPORT_STRUCTURE = [
                 type: 'select', 
                 label: 'Concentration (ci)', 
                 width: 1,
-                default: '0',
+                default: '/',
                 options: [
                     { value: '0', label: '0: No sea ice' },
                     { value: '1', label: '1: Ship in open water' },

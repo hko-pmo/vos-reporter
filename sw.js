@@ -1,10 +1,14 @@
-const CACHE_NAME = 'vos-app-v2';
+importScripts('version.js');
+
 const ASSETS = [
     './',
     './index.html',
     './style.css',
     './app.js',
     './data.js',
+    './store.js',
+    './renderers.js',
+    './version.js',
     './manifest.json'
 ];
 

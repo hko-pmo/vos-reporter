@@ -53,6 +53,10 @@ class ReportStore {
         if (savedSstMethod) {
             this.state.formData['sst_method'] = savedSstMethod;
         }
+        const savedPtCorrection = localStorage.getItem('vos_pt_correction');
+        if (savedPtCorrection) {
+            this.state.formData['pt_correction'] = savedPtCorrection;
+        }
     }
 
     getFormData() {
@@ -115,6 +119,7 @@ class ReportStore {
     generateFullReport() {
         let groups = [];
         let wetBulbGroup = null;
+        let marineHeaderCode = '';
 
         REPORT_STRUCTURE.forEach(group => {
             // Skip logic for Present & Past Weather
@@ -122,8 +127,24 @@ class ReportStore {
                 return;
             }
 
+            // Skip logic for Sea Ice
+            if (group.id === 'ice_data' && (this.state.formData['ice_conc'] === '/' || this.state.formData['ice_conc'] === undefined)) {
+                return;
+            }
+
             let code = this.generateGroupCode(group);
             
+            // Special handling for Position group to split Marine Header (222DsVs)
+            if (group.id === 'position' && code !== '...') {
+                // Look for the spacer ' 222'
+                const splitIndex = code.indexOf(' 222');
+                if (splitIndex !== -1) {
+                    const posCode = code.substring(0, splitIndex);
+                    marineHeaderCode = code.substring(splitIndex + 1); // "222..."
+                    code = posCode;
+                }
+            }
+
             // Special handling for Wet Bulb group (8swTbTbTb)
             if (group.id === 'temp_humidity' && code !== '...') {
                 const match = code.match(/ (8\d{4})$/);
@@ -134,14 +155,21 @@ class ReportStore {
             }
 
             if (code !== '...' && code !== '') {
-                groups.push({ id: group.id, code: code });
+                groups.push({ id: group.id, code: code, section: group.section });
             }
         });
 
         let report = '';
         let wetBulbInserted = false;
+        let marineHeaderInserted = false;
 
         groups.forEach(g => {
+            // Insert Marine Header before the first Section 2 group
+            if (marineHeaderCode && !marineHeaderInserted && g.section === 2) {
+                report += marineHeaderCode + ' ';
+                marineHeaderInserted = true;
+            }
+
             if (wetBulbGroup && !wetBulbInserted && g.id === 'ice_data') {
                 report += wetBulbGroup + ' ';
                 wetBulbInserted = true;
@@ -149,6 +177,10 @@ class ReportStore {
             report += g.code + ' ';
         });
 
+        // Fallbacks
+        if (marineHeaderCode && !marineHeaderInserted) {
+             report += marineHeaderCode + ' ';
+        }
         if (wetBulbGroup && !wetBulbInserted) {
             report += wetBulbGroup + ' ';
         }

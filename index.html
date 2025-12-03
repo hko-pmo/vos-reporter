@@ -10,7 +10,7 @@
 </head>
 <body>
     <header>
-        <h1>Weather Report Composer <small style="font-size: 0.5em; font-weight: normal; opacity: 0.8;">Version 0.12</small></h1>
+        <h1>Weather Report Composer <small style="font-size: 0.5em; font-weight: normal; opacity: 0.8;">Version <span id="app-version"></span></small></h1>
         <div id="step-indicator">Step 1 of X</div>
     </header>
 
@@ -37,6 +37,10 @@
         </div>
     </div>
 
+    <script src="version.js"></script>
+    <script>
+        document.getElementById('app-version').textContent = APP_VERSION;
+    </script>
     <script src="data.js"></script>
     <script src="store.js"></script>
     <script src="renderers.js"></script>
