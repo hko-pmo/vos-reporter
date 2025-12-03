@@ -105,6 +105,14 @@ function renderStep() {
         Renderers.renderTempHumidityComponent(groupDiv, group, store, updatePreview);
     } else if (group.customComponent === 'pressure-tendency-input') {
         Renderers.renderPressureTendencyComponent(groupDiv, group, store, updatePreview);
+    } else if (group.customComponent === 'wind-input') {
+        Renderers.renderWindComponent(groupDiv, group, store, updatePreview);
+    } else if (group.customComponent === 'wind-waves-input') {
+        Renderers.renderWindWavesComponent(groupDiv, group, store, updatePreview);
+    } else if (group.customComponent === 'sea-temp-input') {
+        Renderers.renderSeaTempComponent(groupDiv, group, store, updatePreview);
+    } else if (group.customComponent === 'ice-accretion-input') {
+        Renderers.renderIceAccretionComponent(groupDiv, group, store, updatePreview);
     } else if (group.customComponent === 'present-weather-input') {
         Renderers.renderPresentWeatherComponent(groupDiv, group, store, updatePreview);
     } else if (group.customComponent === 'swell-input') {

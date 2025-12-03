@@ -71,8 +71,17 @@ const Renderers = {
         latFlex.style.display = 'flex';
         latFlex.style.alignItems = 'center';
         
-        latFlex.appendChild(createInput('pos_lat_deg', 'Degrees'));
-        latFlex.appendChild(createInput('pos_lat_min', 'Minutes'));
+        const latDeg = createInput('pos_lat_deg', 'Degrees');
+        latDeg.querySelector('input').min = 0;
+        latDeg.querySelector('input').max = 90;
+        latFlex.appendChild(latDeg);
+
+        const latMin = createInput('pos_lat_min', 'Minutes');
+        latMin.querySelector('input').min = 0;
+        latMin.querySelector('input').max = 59.9;
+        latMin.querySelector('input').step = 0.1;
+        latFlex.appendChild(latMin);
+
         latFlex.appendChild(createRadio('pos_lat_dir', 'lat_dir', [
             { value: 'N', label: 'North' },
             { value: 'S', label: 'South' }
@@ -88,8 +97,17 @@ const Renderers = {
         longFlex.style.display = 'flex';
         longFlex.style.alignItems = 'center';
 
-        longFlex.appendChild(createInput('pos_long_deg', 'Degrees'));
-        longFlex.appendChild(createInput('pos_long_min', 'Minutes'));
+        const longDeg = createInput('pos_long_deg', 'Degrees');
+        longDeg.querySelector('input').min = 0;
+        longDeg.querySelector('input').max = 180;
+        longFlex.appendChild(longDeg);
+
+        const longMin = createInput('pos_long_min', 'Minutes');
+        longMin.querySelector('input').min = 0;
+        longMin.querySelector('input').max = 59.9;
+        longMin.querySelector('input').step = 0.1;
+        longFlex.appendChild(longMin);
+
         // Vertical layout for Longitude (same as Latitude)
         longFlex.appendChild(createRadio('pos_long_dir', 'long_dir', [
             { value: 'W', label: 'West' },
@@ -97,6 +115,22 @@ const Renderers = {
         ]));
         longRow.appendChild(longFlex);
         container.appendChild(longRow);
+
+        // Add validation logic to inputs
+        [latDeg, latMin, longDeg, longMin].forEach(wrapper => {
+            const inp = wrapper.querySelector('input');
+            inp.addEventListener('input', () => {
+                const val = parseFloat(inp.value);
+                if (!isNaN(val)) {
+                    if (inp.min && val < parseFloat(inp.min)) inp.setCustomValidity(`Min ${inp.min}`);
+                    else if (inp.max && val > parseFloat(inp.max)) inp.setCustomValidity(`Max ${inp.max}`);
+                    else inp.setCustomValidity('');
+                } else {
+                    inp.setCustomValidity('');
+                }
+                inp.reportValidity();
+            });
+        });
 
         function updatePositionValues() {
             const fd = store.getFormData();
@@ -137,6 +171,130 @@ const Renderers = {
 
             updatePreview(group);
         }
+    },
+
+    renderWindComponent: (container, group, store, updatePreview) => {
+        const formData = store.getFormData();
+
+        // Helper for standard inputs
+        const createInput = (field) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-group';
+            const lbl = document.createElement('label');
+            lbl.textContent = field.label;
+            wrapper.appendChild(lbl);
+            
+            const inp = document.createElement('input');
+            inp.type = field.type === 'number' ? 'number' : 'text';
+            inp.id = field.id;
+            inp.value = formData[field.id] || '';
+            if (field.min !== undefined) inp.min = field.min;
+            if (field.max !== undefined) inp.max = field.max;
+            
+            inp.addEventListener('input', (e) => {
+                store.updateFormData(field.id, e.target.value);
+                updatePreview(group);
+            });
+            wrapper.appendChild(inp);
+            return wrapper;
+        };
+
+        // Cloud Cover (Hidden/Computed usually, but here it's text)
+        // Actually in data.js it is hidden: true, default: '/'. So we skip rendering it if hidden.
+        
+        // Wind Direction (Smart Input)
+        const dirWrapper = document.createElement('div');
+        dirWrapper.className = 'input-group';
+        const dirLabel = document.createElement('label');
+        dirLabel.textContent = 'True Wind Direction (dd)';
+        dirWrapper.appendChild(dirLabel);
+
+        const dirInput = document.createElement('input');
+        dirInput.type = 'text'; // Allow text for "Calm", "Var"
+        dirInput.placeholder = 'Degrees (0-360) or 0=Calm, 99=Var';
+        
+        // Initial Value Logic
+        const currentDir = formData['wind_dir'];
+        if (currentDir === '0' || currentDir === '00') dirInput.value = 'Calm (0)';
+        else if (currentDir === '99') dirInput.value = 'Variable (99)';
+        else if (currentDir) {
+            // Convert tens back to degrees for display (approx)
+            dirInput.value = `${parseInt(currentDir) * 10}`; 
+        }
+
+        dirInput.addEventListener('change', (e) => {
+            let val = e.target.value.trim().toLowerCase();
+            let code = '';
+            let display = '';
+
+            if (val === 'calm' || val === '0' || val === '00') {
+                code = '00';
+                display = 'Calm (0)';
+            } else if (val === 'var' || val === 'variable' || val === '99') {
+                code = '99';
+                display = 'Variable (99)';
+            } else {
+                const num = parseFloat(val);
+                if (!isNaN(num)) {
+                    if (num >= 0 && num <= 360) {
+                        let tens = Math.round(num / 10);
+                        if (tens === 0) {
+                            // 0-4 degrees -> Calm? Or 360?
+                            // Usually 360 -> 36. 0 -> Calm.
+                            // If user typed 0, handled above.
+                            // If user typed 4 -> 0 -> Calm.
+                            // If user typed 358 -> 36.
+                            if (num < 5 && num > 0) {
+                                // Ambiguous. Let's assume 360 if they meant North, but 0 is Calm.
+                                // Standard: 0 is calm. 360 is North (36).
+                                // If input is small number, maybe they meant tens?
+                                // We assume DEGREES.
+                                code = '00'; 
+                                display = 'Calm (0)';
+                            } else {
+                                code = tens.toString().padStart(2, '0');
+                                display = `${num}° (Code: ${code})`;
+                            }
+                        } else {
+                            code = tens.toString().padStart(2, '0');
+                            display = `${num}° (Code: ${code})`;
+                        }
+                    } else {
+                        // Invalid
+                        alert('Direction must be 0-360');
+                        e.target.value = '';
+                        return;
+                    }
+                } else {
+                    // Invalid text
+                    return;
+                }
+            }
+            
+            store.updateFormData('wind_dir', code);
+            e.target.value = display;
+            updatePreview(group);
+        });
+
+        // On focus, clear the "fancy" text to allow editing
+        dirInput.addEventListener('focus', (e) => {
+            const val = store.getFormData()['wind_dir'];
+            if (val === '00') e.target.value = '0';
+            else if (val === '99') e.target.value = '99';
+            else if (val) e.target.value = parseInt(val) * 10;
+            else e.target.value = '';
+        });
+
+        dirWrapper.appendChild(dirInput);
+        const dirHelp = document.createElement('div');
+        dirHelp.className = 'help-text';
+        dirHelp.textContent = 'Input degrees (0-360). 0=Calm, 99=Variable. Auto-converts to tens.';
+        dirWrapper.appendChild(dirHelp);
+        container.appendChild(dirWrapper);
+
+        // Wind Speed
+        const speedField = group.fields.find(f => f.id === 'wind_speed');
+        container.appendChild(createInput(speedField));
     },
 
     renderTempHumidityComponent: (container, group, store, updatePreview) => {
@@ -212,6 +370,7 @@ const Renderers = {
         modeSelect.value = formData['th_mode'] || 'none';
         modeSelect.addEventListener('change', (e) => {
             store.updateFormData('th_mode', e.target.value);
+            localStorage.setItem('vos_th_mode', e.target.value);
             updateVisibility();
             updateTempValues();
         });
@@ -556,7 +715,7 @@ const Renderers = {
         charWrapper.appendChild(charSelect);
         container.appendChild(charWrapper);
 
-        const amountInput = createInput('pt_amount', 'Amount of Change [0.0 - 50.0 hPa]', 'number', '100%', 'Change in last 3 hours, e.g. 1.4 hPa. No negative numbers. Use "Characteristic" to indicate sign.', 0.0, 50.0);
+        const amountInput = createInput('pt_amount', 'Amount of Change [0.0 - 50.0 hPa]', 'number', '100%', 'Change of pressure in last 3 hours, e.g. 1.4. No negative numbers. Use "Characteristic" to indicate sign.', 0.0, 50.0);
         container.appendChild(amountInput.wrapper);
 
         function updateVisibility() {
@@ -685,13 +844,86 @@ const Renderers = {
         const inputsContainer = document.createElement('div');
         container.appendChild(inputsContainer);
 
-        const s1Dir = createInput('swell1_dir', 'Primary Swell Direction [Tens of Degrees]', 'number', '100%', '1-36. 0: Calm. 99: Confused. /: Unknown.', '1', '99', 0);
-        const s1Per = createInput('swell1_period', 'Primary Swell Period [1 - 50 Seconds]', 'text', '100%', '/: Not determined.');
-        const s1Hgt = createInput('swell1_height', 'Primary Swell Height [0.5 - 49.0 Meters]', 'text', '100%', 'Input in meters (e.g. 2.5).', '0.1', '49', 0);
+        // Helper for Direction Input (Reused logic)
+        const createDirectionInput = (id, label) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-group';
+            const lbl = document.createElement('label');
+            lbl.textContent = label;
+            wrapper.appendChild(lbl);
 
-        const s2Dir = createInput('swell2_dir', 'Secondary Swell Direction [Tens of Degrees]', 'number', '100%', '1-36. 0: Calm. 99: Confused. /: Unknown.', '1', '99', 0);
-        const s2Per = createInput('swell2_period', 'Secondary Swell Period [1 - 50 Seconds]', 'text', '100%', '/: Not determined.');
-        const s2Hgt = createInput('swell2_height', 'Secondary Swell Height [0.5 - 49.0 Meters]', 'text', '100%', 'Input in meters (e.g. 2.5).', '0.1', '49', 0);
+            const inp = document.createElement('input');
+            inp.type = 'text';
+            inp.id = id;
+            inp.placeholder = 'Degrees (0-360) or 0=Calm, 99=Confused';
+
+            // Initial Value
+            const currentDir = formData[id];
+            if (currentDir === '0' || currentDir === '00') inp.value = 'Calm (0)';
+            else if (currentDir === '99') inp.value = 'Confused (99)';
+            else if (currentDir) inp.value = `${parseInt(currentDir) * 10}`;
+
+            inp.addEventListener('change', (e) => {
+                let val = e.target.value.trim().toLowerCase();
+                let code = '';
+                let display = '';
+
+                if (val === 'calm' || val === '0' || val === '00') {
+                    code = '00';
+                    display = 'Calm (0)';
+                } else if (val === 'confused' || val === 'var' || val === '99') {
+                    code = '99';
+                    display = 'Confused (99)';
+                } else {
+                    const num = parseFloat(val);
+                    if (!isNaN(num)) {
+                        if (num >= 0 && num <= 360) {
+                            let tens = Math.round(num / 10);
+                            if (tens === 0) {
+                                code = '00';
+                                display = 'Calm (0)';
+                            } else {
+                                code = tens.toString().padStart(2, '0');
+                                display = `${num}° (Code: ${code})`;
+                            }
+                        } else {
+                            alert('Direction must be 0-360');
+                            e.target.value = '';
+                            return;
+                        }
+                    } else {
+                        return;
+                    }
+                }
+                store.updateFormData(id, code);
+                e.target.value = display;
+                updateSwellValues();
+            });
+
+            inp.addEventListener('focus', (e) => {
+                const val = store.getFormData()[id];
+                if (val === '00') e.target.value = '0';
+                else if (val === '99') e.target.value = '99';
+                else if (val) e.target.value = parseInt(val) * 10;
+                else e.target.value = '';
+            });
+
+            wrapper.appendChild(inp);
+            const h = document.createElement('div');
+            h.className = 'help-text';
+            h.textContent = 'Input degrees (0-360). 0=Calm, 99=Confused.';
+            wrapper.appendChild(h);
+            
+            return { wrapper, inp };
+        };
+
+        const s1Dir = createDirectionInput('swell1_dir', 'Primary Swell Direction');
+        const s1Per = createInput('swell1_period', 'Primary Swell Period [1 - 50 Seconds]', 'number', '100%', '/: Not determined.', '1', '50', 0);
+        const s1Hgt = createInput('swell1_height', 'Primary Swell Height [0.5 - 49.0 Meters]', 'number', '100%', 'Input in meters (e.g. 2.5).', '0.1', '49', 0);
+
+        const s2Dir = createDirectionInput('swell2_dir', 'Secondary Swell Direction');
+        const s2Per = createInput('swell2_period', 'Secondary Swell Period [1 - 50 Seconds]', 'number', '100%', '/: Not determined.', '1', '50', 0);
+        const s2Hgt = createInput('swell2_height', 'Secondary Swell Height [0.5 - 49.0 Meters]', 'number', '100%', 'Input in meters (e.g. 2.5).', '0.1', '49', 0);
 
         [s1Dir, s1Per, s1Hgt, s2Dir, s2Per, s2Hgt].forEach(el => {
             el.wrapper.style.display = 'none';
@@ -776,5 +1008,390 @@ const Renderers = {
 
         updateVisibility();
         updateSwellValues();
+    },
+
+    renderSeaTempComponent: (container, group, store, updatePreview) => {
+        const formData = store.getFormData();
+
+        const createInput = (id, label, type = 'number', width = '100%', help = '', min = undefined, max = undefined) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-group';
+            
+            const lbl = document.createElement('label');
+            lbl.textContent = label;
+            lbl.htmlFor = id;
+            wrapper.appendChild(lbl);
+
+            const inp = document.createElement('input');
+            inp.type = type;
+            inp.id = id;
+            inp.style.width = width;
+            inp.value = formData[id] || '';
+            inp.step = '0.1';
+            if (min !== undefined) inp.min = min;
+            if (max !== undefined) inp.max = max;
+
+            inp.addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (type === 'number' && val !== '') {
+                    const numVal = parseFloat(val);
+                    if (min !== undefined && numVal < min) {
+                        inp.setCustomValidity(`Value must be >= ${min}`);
+                    } else if (max !== undefined && numVal > max) {
+                        inp.setCustomValidity(`Value must be <= ${max}`);
+                    } else {
+                        inp.setCustomValidity('');
+                    }
+                    inp.reportValidity();
+                }
+                store.updateFormData(id, val);
+                updateValues();
+            });
+            wrapper.appendChild(inp);
+
+            if (help) {
+                const h = document.createElement('div');
+                h.className = 'help-text';
+                h.textContent = help;
+                wrapper.appendChild(h);
+            }
+            return { wrapper, inp };
+        };
+
+        const methodWrapper = document.createElement('div');
+        methodWrapper.className = 'input-group';
+        const methodLabel = document.createElement('label');
+        methodLabel.textContent = 'Method (ss)';
+        methodWrapper.appendChild(methodLabel);
+
+        const methodSelect = document.createElement('select');
+        methodSelect.id = 'sst_method';
+        const methods = [
+            { value: '/', label: '/: Not determined' },
+            { value: 'intake', label: 'Intake measurement' },
+            { value: 'bucket', label: 'Bucket measurement' },
+            { value: 'hull', label: 'Hull contact sensor' }
+        ];
+        methods.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.value;
+            opt.textContent = m.label;
+            methodSelect.appendChild(opt);
+        });
+        methodSelect.value = formData['sst_method'] || '/';
+        methodSelect.addEventListener('change', (e) => {
+            store.updateFormData('sst_method', e.target.value);
+            localStorage.setItem('vos_sst_method', e.target.value);
+            updateVisibility();
+            updateValues();
+        });
+        methodWrapper.appendChild(methodSelect);
+        container.appendChild(methodWrapper);
+
+        const tempInput = createInput('sst_temp', 'Temp (TwTwTw) [-2.0 - 50.0 °C]', 'number', '100%', 'e.g. 24.5', -2.0, 50.0);
+        container.appendChild(tempInput.wrapper);
+
+        function updateVisibility() {
+            const fd = store.getFormData();
+            const method = fd['sst_method'] || '/';
+            if (method === '/') {
+                tempInput.inp.disabled = true;
+                tempInput.inp.value = '';
+                store.updateFormData('sst_temp', '');
+            } else {
+                tempInput.inp.disabled = false;
+            }
+        }
+
+        function updateValues() {
+            const fd = store.getFormData();
+            const method = fd['sst_method'] || '/';
+            const tempVal = parseFloat(fd['sst_temp']);
+
+            let code = '';
+
+            if (method !== '/' && !isNaN(tempVal)) {
+                let ss = '';
+                const isNegative = tempVal < 0;
+                
+                if (method === 'intake') {
+                    ss = isNegative ? '1' : '0';
+                } else if (method === 'bucket') {
+                    ss = isNegative ? '3' : '2';
+                } else if (method === 'hull') {
+                    ss = isNegative ? '5' : '4';
+                }
+
+                const t = Math.round(Math.abs(tempVal) * 10).toString().padStart(3, '0');
+                code = `0${ss}${t}`;
+            }
+
+            store.updateFormData('sea_temp_code', code);
+            updatePreview(group);
+        }
+
+        updateVisibility();
+        updateValues();
+    },
+
+    renderWindWavesComponent: (container, group, store, updatePreview) => {
+        const formData = store.getFormData();
+
+        const createInput = (id, label, type = 'number', width = '100%', help = '', min = undefined, max = undefined) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-group';
+            
+            const lbl = document.createElement('label');
+            lbl.textContent = label;
+            lbl.htmlFor = id;
+            wrapper.appendChild(lbl);
+
+            const inp = document.createElement('input');
+            inp.type = type;
+            inp.id = id;
+            inp.style.width = width;
+            inp.value = formData[id] || '';
+            if (min !== undefined) inp.min = min;
+            if (max !== undefined) inp.max = max;
+
+            inp.addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (type === 'number' && val !== '') {
+                    const numVal = parseFloat(val);
+                    if (min !== undefined && numVal < min) {
+                        inp.setCustomValidity(`Value must be >= ${min}`);
+                    } else if (max !== undefined && numVal > max) {
+                        inp.setCustomValidity(`Value must be <= ${max}`);
+                    } else {
+                        inp.setCustomValidity('');
+                    }
+                    inp.reportValidity();
+                }
+                store.updateFormData(id, val);
+                updateValues();
+            });
+            wrapper.appendChild(inp);
+
+            if (help) {
+                const h = document.createElement('div');
+                h.className = 'help-text';
+                h.textContent = help;
+                wrapper.appendChild(h);
+            }
+            return { wrapper, inp };
+        };
+
+        // Period: 0-50, or 99, or /
+        // We can use a select for special values or just text input with validation?
+        // User asked for limits.
+        // Let's use a number input for 0-50, and a checkbox for "Confused (99)" and "Not Determined (/)"?
+        // Or just a smart input like Wind Direction?
+        // Let's try Smart Input for Period.
+
+        const periodWrapper = document.createElement('div');
+        periodWrapper.className = 'input-group';
+        const periodLabel = document.createElement('label');
+        periodLabel.textContent = 'Period (PwPw) [0 - 50 Seconds]';
+        periodWrapper.appendChild(periodLabel);
+
+        const periodInput = document.createElement('input');
+        periodInput.type = 'text';
+        periodInput.placeholder = 'Seconds (0-50) or 99=Confused';
+        
+        const currentPer = formData['wave_period'];
+        if (currentPer === '99') periodInput.value = 'Confused (99)';
+        else if (currentPer === '/') periodInput.value = 'Not Determined (/)';
+        else if (currentPer) periodInput.value = currentPer;
+
+        periodInput.addEventListener('change', (e) => {
+            let val = e.target.value.trim().toLowerCase();
+            let code = '';
+            let display = '';
+
+            if (val === 'confused' || val === '99') {
+                code = '99';
+                display = 'Confused (99)';
+            } else if (val === '/' || val === 'not determined' || val === '') {
+                code = '/';
+                display = 'Not Determined (/)';
+            } else {
+                const num = parseFloat(val);
+                if (!isNaN(num)) {
+                    if (num >= 0 && num <= 50) {
+                        code = Math.round(num).toString();
+                        display = code;
+                    } else {
+                        alert('Period must be 0-50');
+                        e.target.value = '';
+                        return;
+                    }
+                } else {
+                    code = '/';
+                    display = 'Not Determined (/)';
+                }
+            }
+            store.updateFormData('wave_period', code);
+            e.target.value = display;
+            updateValues();
+        });
+        
+        periodInput.addEventListener('focus', (e) => {
+            const val = store.getFormData()['wave_period'];
+            if (val === '99') e.target.value = '99';
+            else if (val === '/') e.target.value = '';
+            else e.target.value = val || '';
+        });
+
+        periodWrapper.appendChild(periodInput);
+        container.appendChild(periodWrapper);
+
+        // Height: 0-49. / allowed.
+        const heightInput = createInput('wave_height', 'Height (HwHw) [0.0 - 49.0 Meters]', 'number', '100%', 'Input in meters (e.g. 2.5). Leave empty for Not Determined.', 0, 49);
+        container.appendChild(heightInput.wrapper);
+
+        function updateValues() {
+            const fd = store.getFormData();
+            const per = fd['wave_period'] || '/';
+            const hgt = fd['wave_height'];
+
+            let code = '';
+            
+            // 2PwPwHwHw
+            // If both are /, skip? Or 2////?
+            // Usually if not observed, skip.
+            // If one is observed, report.
+            
+            if (per === '/' && (hgt === undefined || hgt === '')) {
+                code = ''; // Skip
+            } else {
+                let p = per;
+                if (p === '/') p = '//';
+                else p = p.padStart(2, '0');
+
+                let h = '//';
+                if (hgt !== undefined && hgt !== '') {
+                    const hVal = parseFloat(hgt);
+                    if (!isNaN(hVal)) {
+                        h = Math.round(hVal * 2).toString().padStart(2, '0');
+                    }
+                }
+                
+                code = `2${p}${h}`;
+            }
+
+            store.updateFormData('wind_waves_code', code);
+            updatePreview(group);
+        }
+        
+        updateValues();
+    },
+
+    renderIceAccretionComponent: (container, group, store, updatePreview) => {
+        const formData = store.getFormData();
+
+        const createSelect = (id, label, options) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-group';
+            const lbl = document.createElement('label');
+            lbl.textContent = label;
+            wrapper.appendChild(lbl);
+            
+            const sel = document.createElement('select');
+            sel.id = id;
+            options.forEach(opt => {
+                const o = document.createElement('option');
+                o.value = opt.value;
+                o.textContent = opt.label;
+                sel.appendChild(o);
+            });
+            sel.value = formData[id] || '/';
+            sel.addEventListener('change', (e) => {
+                store.updateFormData(id, e.target.value);
+                updateVisibility();
+                updateValues();
+            });
+            wrapper.appendChild(sel);
+            return { wrapper, sel };
+        };
+
+        const sourceSelect = createSelect('ice_source', 'Source', [
+            { value: '1', label: '1: Icing from ocean spray' },
+            { value: '2', label: '2: Icing from fog' },
+            { value: '3', label: '3: Spray + Fog' },
+            { value: '4', label: '4: Rain' },
+            { value: '5', label: '5: Spray + Rain' },
+            { value: '/', label: '/: Not determined' }
+        ]);
+        container.appendChild(sourceSelect.wrapper);
+
+        const thickWrapper = document.createElement('div');
+        thickWrapper.className = 'input-group';
+        thickWrapper.innerHTML = '<label>Thickness [0 - 99 cm]</label>';
+        const thickInput = document.createElement('input');
+        thickInput.type = 'number';
+        thickInput.min = 0;
+        thickInput.max = 99;
+        thickInput.value = formData['ice_thickness'] || '';
+        thickInput.addEventListener('input', (e) => {
+            store.updateFormData('ice_thickness', e.target.value);
+            updateValues();
+        });
+        thickWrapper.appendChild(thickInput);
+        container.appendChild(thickWrapper);
+
+        const rateSelect = createSelect('ice_rate', 'Rate', [
+            { value: '0', label: '0: Stable' },
+            { value: '1', label: '1: Slight buildup' },
+            { value: '2', label: '2: Rapid' },
+            { value: '3', label: '3: Very rapid' },
+            { value: '4', label: '4: Melting' },
+            { value: '/', label: '/: Not determined' }
+        ]);
+        container.appendChild(rateSelect.wrapper);
+
+        function updateVisibility() {
+            const fd = store.getFormData();
+            const src = fd['ice_source'] || '/';
+            if (src === '/') {
+                thickInput.disabled = true;
+                thickInput.value = '';
+                store.updateFormData('ice_thickness', '');
+                rateSelect.sel.disabled = true;
+                rateSelect.sel.value = '/';
+                store.updateFormData('ice_rate', '/');
+            } else {
+                thickInput.disabled = false;
+                rateSelect.sel.disabled = false;
+            }
+        }
+
+        function updateValues() {
+            const fd = store.getFormData();
+            const src = fd['ice_source'] || '/';
+            const thick = fd['ice_thickness'];
+            const rate = fd['ice_rate'] || '/';
+
+            let code = '';
+
+            if (src !== '/') {
+                // 6IsEsRs
+                // Is = source
+                // Es = thickness in cm
+                // Rs = rate
+                
+                let es = '//';
+                if (thick !== undefined && thick !== '') {
+                    es = parseInt(thick).toString().padStart(2, '0');
+                }
+                
+                code = `6${src}${es}${rate}`;
+            }
+
+            store.updateFormData('ice_accretion_code', code);
+            updatePreview(group);
+        }
+
+        updateVisibility();
+        updateValues();
     }
 };

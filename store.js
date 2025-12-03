@@ -41,6 +41,18 @@ class ReportStore {
         if (savedEmail) {
             this.state.formData['email_recipient'] = savedEmail;
         }
+        const savedWindInd = localStorage.getItem('vos_wind_indicator');
+        if (savedWindInd) {
+            this.state.formData['wind_indicator'] = savedWindInd;
+        }
+        const savedThMode = localStorage.getItem('vos_th_mode');
+        if (savedThMode) {
+            this.state.formData['th_mode'] = savedThMode;
+        }
+        const savedSstMethod = localStorage.getItem('vos_sst_method');
+        if (savedSstMethod) {
+            this.state.formData['sst_method'] = savedSstMethod;
+        }
     }
 
     getFormData() {
@@ -121,7 +133,7 @@ class ReportStore {
                 }
             }
 
-            if (code !== '...') {
+            if (code !== '...' && code !== '') {
                 groups.push({ id: group.id, code: code });
             }
         });

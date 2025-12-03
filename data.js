@@ -24,6 +24,7 @@ const REPORT_STRUCTURE = [
                 type: 'select', 
                 label: 'Wind Indicator (iw)', 
                 width: 1,
+                persist: true,
                 options: [
                     { value: '3', label: '3: Speed estimated (knots)' },
                     { value: '4', label: '4: Speed measured (knots)' },
@@ -118,6 +119,7 @@ const REPORT_STRUCTURE = [
         name: 'Wind',
         section: 1,
         mandatory: true,
+        customComponent: 'wind-input',
         fields: [
             { 
                 id: 'cloud_cover', 
@@ -394,36 +396,9 @@ const REPORT_STRUCTURE = [
         name: 'Sea Surface Temperature',
         section: 2,
         mandatory: false,
+        customComponent: 'sea-temp-input',
         fields: [
-            { id: 'indicator_0', type: 'static', value: '0', label: 'Indicator', hidden: true },
-            { 
-                id: 'sst_method', 
-                type: 'select', 
-                label: 'Method (ss)', 
-                width: 2,
-                default: '/',
-                options: [
-                    { value: '0', label: '0: Intake (Positive)' },
-                    { value: '1', label: '1: Intake (Negative)' },
-                    { value: '2', label: '2: Bucket (Positive)' },
-                    { value: '3', label: '3: Bucket (Negative)' },
-                    { value: '4', label: '4: Hull Contact (Positive)' },
-                    { value: '5', label: '5: Hull Contact (Negative)' },
-                    { value: '/', label: '/: Not determined' }
-                ]
-            },
-            { 
-                id: 'sst_temp', 
-                type: 'number', 
-                label: 'Temp (TwTwTw) (°C)', 
-                min: 0, 
-                max: 40, 
-                step: 0.1,
-                width: 3, 
-                pad: true, 
-                transform: (val) => Math.round(parseFloat(val) * 10),
-                help: 'e.g. 24.5' 
-            }
+            { id: 'sea_temp_code', type: 'computed', label: 'Code' }
         ]
     },
     {
@@ -431,30 +406,9 @@ const REPORT_STRUCTURE = [
         name: 'Wind Waves',
         section: 2,
         mandatory: false,
+        customComponent: 'wind-waves-input',
         fields: [
-            { id: 'indicator_2', type: 'static', value: '2', label: 'Indicator', hidden: true },
-            { 
-                id: 'wave_period', 
-                type: 'text', 
-                label: 'Period (PwPw) [0 - 50 Seconds]', 
-                width: 2, 
-                pad: true, 
-                help: '99: Confused sea. /: Not determined.' 
-            },
-            { 
-                id: 'wave_height', 
-                type: 'text', 
-                label: 'Height (HwHw) [0.0 - 49.0 Meters]', 
-                width: 2, 
-                pad: true,
-                transform: (val) => {
-                    if (val === '/') return '/';
-                    const num = parseFloat(val);
-                    if (isNaN(num)) return '/';
-                    return Math.round(num * 2).toString();
-                },
-                help: 'Input in meters (e.g. 2.5). /: Not determined.' 
-            }
+            { id: 'wind_waves_code', type: 'computed', label: 'Code' }
         ]
     },
     {
@@ -472,44 +426,9 @@ const REPORT_STRUCTURE = [
         name: 'Ice Accretion',
         section: 2,
         mandatory: false,
+        customComponent: 'ice-accretion-input',
         fields: [
-            { id: 'indicator_6', type: 'static', value: '6', label: 'Indicator', hidden: true },
-            { 
-                id: 'ice_source', 
-                type: 'select', 
-                label: 'Source', 
-                width: 1,
-                options: [
-                    { value: '1', label: '1: Icing from ocean spray' },
-                    { value: '2', label: '2: Icing from fog' },
-                    { value: '3', label: '3: Spray + Fog' },
-                    { value: '4', label: '4: Rain' },
-                    { value: '5', label: '5: Spray + Rain' },
-                    { value: '/', label: '/: Not determined' }
-                ]
-            },
-            { 
-                id: 'ice_thickness', 
-                type: 'text', 
-                label: 'Thickness [0 - 99 cm]', 
-                width: 2, 
-                pad: true,
-                help: 'Input in cm. /: Not determined.'
-            },
-            { 
-                id: 'ice_rate', 
-                type: 'select', 
-                label: 'Rate', 
-                width: 1,
-                options: [
-                    { value: '0', label: '0: Stable' },
-                    { value: '1', label: '1: Slight buildup' },
-                    { value: '2', label: '2: Rapid' },
-                    { value: '3', label: '3: Very rapid' },
-                    { value: '4', label: '4: Melting' },
-                    { value: '/', label: '/: Not determined' }
-                ]
-            }
+            { id: 'ice_accretion_code', type: 'computed', label: 'Code' }
         ]
     },
     {
