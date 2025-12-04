@@ -6,6 +6,7 @@ const REPORT_STRUCTURE = [
         description: "This webpage is designed for Voluntary Observing Ships to compile FM13 SHIP weather reports. Follow the steps to complete the reports. Some steps can be skipped. At the end you will be redirected to send the report via email. When reloading the page, some settings, such as call sign, are automatically loaded. For any suggestions and feedbacks, please send them to hkopmo@hko.gov.hk (this is NOT the report recipient address).",
         section: 0,
         mandatory: true,
+        wmoOrder: 0,
         fields: [
             { id: 'bbxx', type: 'static', value: 'BBXX ', label: 'Report Type' },
             { id: 'callsign', type: 'text', label: 'Call Sign', width: 0, uppercase: true, persist: true },
@@ -17,6 +18,7 @@ const REPORT_STRUCTURE = [
         name: 'Observation Date & Time',
         section: 0,
         mandatory: true,
+        wmoOrder: 1,
         fields: [
             { id: 'day', type: 'number', label: 'Day of Month', min: 1, max: 31, width: 2, pad: true },
             { id: 'hour', type: 'number', label: 'Hour in UTC', min: 0, max: 23, width: 2, pad: true },
@@ -40,6 +42,7 @@ const REPORT_STRUCTURE = [
         name: 'Position and Ship Course',
         section: 0,
         mandatory: true,
+        wmoOrder: 2,
         customComponent: 'position-input',
         fields: [
             // Latitude Group: 99LaLaLa
@@ -103,66 +106,11 @@ const REPORT_STRUCTURE = [
 
     // --- SECTION 1: METEOROLOGICAL DATA ---
     {
-        id: 'precip_vis',
-        name: 'Cloud Base and Visibility',
-        section: 1,
-        mandatory: true, 
-        fields: [
-            { id: 'indicator_4', type: 'static', value: '4', label: 'Precipitation Indicator (Fixed)', hidden: true },
-            { 
-                id: 'weather_indicator', 
-                type: 'static', 
-                value: '1',
-                label: 'Weather Data Indicator (ix)', 
-                hidden: true
-            },
-            { 
-                id: 'cloud_base', 
-                type: 'select', 
-                label: 'Visual Estimate of Height of Cloud Base (h)', 
-                width: 1,
-                default: '/',
-                help: '0-7: <2000m (Cu, St, Sc, Cb, Ns). 8-9: >2000m (As, Ac, Ns) or >2500m (Ci, Cs, Cc). /: Obscured or unknown.',
-                options: [
-                    { value: '0', label: '0: 0 to 50m' },
-                    { value: '1', label: '1: 50 to 100m' },
-                    { value: '2', label: '2: 100 to 200m' },
-                    { value: '3', label: '3: 200 to 300m' },
-                    { value: '4', label: '4: 300 to 600m' },
-                    { value: '5', label: '5: 600 to 1000m' },
-                    { value: '6', label: '6: 1000 to 1500m' },
-                    { value: '7', label: '7: 1500 to 2000m' },
-                    { value: '8', label: '8: 2000 to 2500m' },
-                    { value: '9', label: '9: > 2500m or no clouds' },
-                    { value: '/', label: '/: Unknown/Obscured' }
-                ]
-            },
-            { 
-                id: 'visibility', 
-                type: 'select', 
-                label: 'Visibility Code (VV)', 
-                width: 2, 
-                default: '99',
-                options: [
-                    { value: '90', label: '90: < 50 m' },
-                    { value: '91', label: '91: 50 to < 200 m' },
-                    { value: '92', label: '92: 200 to < 500 m' },
-                    { value: '93', label: '93: 500 to < 1000 m' },
-                    { value: '94', label: '94: 1 to < 2 km' },
-                    { value: '95', label: '95: 2 to < 4 km' },
-                    { value: '96', label: '96: 4 to < 10 km' },
-                    { value: '97', label: '97: 10 to < 20 km' },
-                    { value: '98', label: '98: 20 to < 50 km' },
-                    { value: '99', label: '99: ≥ 50 km' }
-                ]
-            } 
-        ]
-    },
-    {
         id: 'wind',
         name: 'Wind',
         section: 1,
         mandatory: true,
+        wmoOrder: 4,
         customComponent: 'wind-input',
         fields: [
             { 
@@ -197,9 +145,21 @@ const REPORT_STRUCTURE = [
         name: 'Temperature & Humidity',
         section: 1,
         mandatory: false,
+        wmoOrder: 5,
         customComponent: 'temp-humidity-input',
         fields: [
             { id: 'temp_humidity_code', type: 'computed', label: 'Code' }
+        ]
+    },
+    {
+        id: 'sea_temp',
+        name: 'Sea Surface Temperature',
+        section: 2,
+        mandatory: false,
+        wmoOrder: 9,
+        customComponent: 'sea-temp-input',
+        fields: [
+            { id: 'sea_temp_code', type: 'computed', label: 'Code' }
         ]
     },
     {
@@ -207,6 +167,7 @@ const REPORT_STRUCTURE = [
         name: 'Mean Sea Level Pressure & Tendency',
         section: 1,
         mandatory: false,
+        wmoOrder: 6,
         customComponent: 'pressure-tendency-input',
         fields: [
             { id: 'pressure_tendency_code', type: 'computed', label: 'Code' },
@@ -219,6 +180,7 @@ const REPORT_STRUCTURE = [
         name: 'Present & Past Weather',
         section: 1,
         mandatory: false,
+        wmoOrder: 7,
         customComponent: 'present-weather-input',
         fields: [
             { id: 'indicator_7', type: 'static', value: '7', label: 'Indicator', hidden: true },
@@ -276,10 +238,68 @@ const REPORT_STRUCTURE = [
         ]
     },
     {
+        id: 'precip_vis',
+        name: 'Cloud Base and Visibility',
+        section: 1,
+        mandatory: true, 
+        wmoOrder: 3,
+        fields: [
+            { id: 'indicator_4', type: 'static', value: '4', label: 'Precipitation Indicator (Fixed)', hidden: true },
+            { 
+                id: 'weather_indicator', 
+                type: 'static', 
+                value: '1',
+                label: 'Weather Data Indicator (ix)', 
+                hidden: true
+            },
+            { 
+                id: 'cloud_base', 
+                type: 'select', 
+                label: 'Visual Estimate of Height of Cloud Base (h)', 
+                width: 1,
+                default: '/',
+                help: '0-7: <2000m (Cu, St, Sc, Cb, Ns). 8-9: >2000m (As, Ac, Ns) or >2500m (Ci, Cs, Cc). /: Obscured or unknown.',
+                options: [
+                    { value: '0', label: '0: 0 to 50m' },
+                    { value: '1', label: '1: 50 to 100m' },
+                    { value: '2', label: '2: 100 to 200m' },
+                    { value: '3', label: '3: 200 to 300m' },
+                    { value: '4', label: '4: 300 to 600m' },
+                    { value: '5', label: '5: 600 to 1000m' },
+                    { value: '6', label: '6: 1000 to 1500m' },
+                    { value: '7', label: '7: 1500 to 2000m' },
+                    { value: '8', label: '8: 2000 to 2500m' },
+                    { value: '9', label: '9: > 2500m or no clouds' },
+                    { value: '/', label: '/: Unknown/Obscured' }
+                ]
+            },
+            { 
+                id: 'visibility', 
+                type: 'select', 
+                label: 'Visibility Code (VV)', 
+                width: 2, 
+                default: '99',
+                options: [
+                    { value: '90', label: '90: < 50 m' },
+                    { value: '91', label: '91: 50 to < 200 m' },
+                    { value: '92', label: '92: 200 to < 500 m' },
+                    { value: '93', label: '93: 500 to < 1000 m' },
+                    { value: '94', label: '94: 1 to < 2 km' },
+                    { value: '95', label: '95: 2 to < 4 km' },
+                    { value: '96', label: '96: 4 to < 10 km' },
+                    { value: '97', label: '97: 10 to < 20 km' },
+                    { value: '98', label: '98: 20 to < 50 km' },
+                    { value: '99', label: '99: ≥ 50 km' }
+                ]
+            } 
+        ]
+    },
+    {
         id: 'cloud_types',
         name: 'Cloud Types',
         section: 1,
         mandatory: false,
+        wmoOrder: 8,
         fields: [
             { id: 'indicator_8', type: 'static', value: '8', label: 'Indicator', hidden: true },
             { 
@@ -386,23 +406,12 @@ const REPORT_STRUCTURE = [
             }
         ]
     },
-    
-    // --- SECTION 2: MARINE DATA ---
-    {
-        id: 'sea_temp',
-        name: 'Sea Surface Temperature',
-        section: 2,
-        mandatory: false,
-        customComponent: 'sea-temp-input',
-        fields: [
-            { id: 'sea_temp_code', type: 'computed', label: 'Code' }
-        ]
-    },
     {
         id: 'wind_waves',
         name: 'Wind Waves',
         section: 2,
         mandatory: false,
+        wmoOrder: 10,
         customComponent: 'wind-waves-input',
         fields: [
             { id: 'wind_waves_code', type: 'computed', label: 'Code' }
@@ -413,6 +422,7 @@ const REPORT_STRUCTURE = [
         name: 'Swell Waves',
         section: 2,
         mandatory: false,
+        wmoOrder: 11,
         customComponent: 'swell-input',
         fields: [
             { id: 'swell_code', type: 'computed', label: 'Code' }
@@ -423,6 +433,7 @@ const REPORT_STRUCTURE = [
         name: 'Ice Accretion',
         section: 2,
         mandatory: false,
+        wmoOrder: 12,
         customComponent: 'ice-accretion-input',
         fields: [
             { id: 'ice_accretion_code', type: 'computed', label: 'Code' }
@@ -433,6 +444,7 @@ const REPORT_STRUCTURE = [
         name: 'Sea Ice',
         section: 2,
         mandatory: false,
+        wmoOrder: 13,
         fields: [
             { id: 'indicator_ice', type: 'static', value: 'ICE ', label: 'Indicator', hidden: true },
             { 
@@ -549,11 +561,11 @@ const CLOUD_DETAILS = {
             "2": { desc: "Cumulus of moderate or strong vertical extent", credit: "photo by R.K. Pilsbury (Crown copyright)", images: ["clouds/cl2.jpg"] },
             "3": { desc: "Cumulonimbus without anvil; at least partially, the summits lack sharp outlines", credit: "photo KNMI", images: ["clouds/cl3.jpg"] },
             "4": { desc: "Stratocumulus formed by the spreading out of Cumulus", credit: "photo KNMI", images: ["clouds/cl4.jpg"] },
-            "5": { desc: "Stratocumulus not resulting from the spreading out of Cumulus", credit: "photo KNMI", images: ["clouds/cl5.jpg"] },
-            "6": { desc: "Stratus in a more or less continuous sheet or layer, or in ragged shreds, or both; no Stratus Fractus of Bad weather present", credit: "photo by Kruegler", images: ["clouds/cl6.jpg"] },
-            "7": { desc: "Stratus Fractus of Bad weather and/or Cumulus fractus of bad weather; generally moving fast and changing shape rapidly; usually below Cm 2", credit: "photo by Kruegler", images: ["clouds/cl7.jpg"] },
-            "8": { desc: "Cumulus and Stratocumulus not formed from the spreading out of Cumulus; bases at different levels", credit: "photo by T. Bergeron", images: ["clouds/cl8.jpg"] },
-            "9": { desc: "Cumulonimbus; upper part is clearly fibrous (cirriform); often in the form of an anvil", credit: "photo by B. Muehr", images: ["clouds/cl9.jpg"] },
+            "5": { desc: "Stratocumulus not formed from spreading cumulus", credit: "photo KNMI", images: ["clouds/cl5.jpg"] },
+            "6": { desc: "Stratus in a sheet or layer", credit: "photo by Kruegler", images: ["clouds/cl6.jpg"] },
+            "7": { desc: "Stratus fractus and/or cumulus fractus of bad weather", credit: "photo by Kruegler", images: ["clouds/cl7.jpg"] },
+            "8": { desc: "Cumulus and stratocumulus (not spreading cumulus), bases at different levels.", credit: "photo by T. Bergeron", images: ["clouds/cl8.jpg"] },
+            "9": { desc: "Cumulonimbus with fibrous top, often with an anvil", credit: "photo by B. Muehr", images: ["clouds/cl9.jpg"] },
             "0": { desc: "No CL clouds", credit: "", images: [] },
             "/": { desc: "Not determined", credit: "", images: [] }
         }
@@ -561,15 +573,15 @@ const CLOUD_DETAILS = {
     mid: {
         title: "Middle Clouds (CM)",
         types: {
-            "1": { desc: "Thin Altostratus; major part of the layer is sufficiently thin to reveal the position of the sun (no Halo)", credit: "photo by Kruegler", images: ["clouds/cm1.jpg"] },
-            "2": { desc: "Thick Altostratus or Nimbostratus", credit: "photo by R.K. Pilsbury (Crown copyright)", images: ["clouds/cm2.jpg"] },
-            "3": { desc: "Semi-transparent Altocumulus; the elements of the cloud change only slowly; at a single level", credit: "photo by B. Muehr", images: ["clouds/cm3.jpg"] },
+            "1": { desc: "Altostratus, semitransparent, sun or moon dimly visible", credit: "photo by Kruegler", images: ["clouds/cm1.jpg"] },
+            "2": { desc: "Altostratus, dense enough to hide sun or moon, or nimbostratus", credit: "photo by R.K. Pilsbury (Crown copyright)", images: ["clouds/cm2.jpg"] },
+            "3": { desc: "Altocumulus, semitransparent, cloud elements change slowly, at a single level", credit: "photo by B. Muehr", images: ["clouds/cm3.jpg"] },
             "4": { desc: "Patches (often in the form of almonds or fishes) of Altocumulus; elements are continually changing in appearance; at one or more levels", credit: "photo by Stahl", images: ["clouds/cm4.jpg"] },
-            "5": { desc: "Altocumulus; progressively invading the sky; generally, thicken as a whole", credit: "photo by R.K. Pilsbury (Crown copyright)", images: ["clouds/cm5.jpg"] },
-            "6": { desc: "Altocumulus formed from the spreading out of Cumulus (or Cumulonimbus)", credit: "photo by A. Viaut", images: ["clouds/cm6.jpg"] },
+            "5": { desc: "Altocumulus, one or more bands or layers, expanding, thickening", credit: "photo by R.K. Pilsbury (Crown copyright)", images: ["clouds/cm5.jpg"] },
+            "6": { desc: "Altocumulus from the spreading of cumulus or cumulonimbus", credit: "photo by A. Viaut", images: ["clouds/cm6.jpg"] },
             "7": { desc: "Altocumulus in two or more layers, not increasing; OR Altocumulus opacus in a single layer, not increasing; OR Altocumulus with Altostratus/Nimbostratus", credit: "photo by R.K. Pilsbury / T. Bergeron / A.J. Aalders", images: ["clouds/cm7a.jpg", "clouds/cm7b.jpg", "clouds/cm7c.jpg"] },
             "8": { desc: "Altocumulus with tower like sproutings.", credit: "photo Australian Bureau of Meteorology", images: ["clouds/cm8.jpg"] },
-            "9": { desc: "Altocumulus of a chaotic sky; generally at several levels; usually clouds of all Cm types mixed with Cl and Ch", credit: "photo by R.K. Pilsbury (Crown copyright)", images: ["clouds/cm9.jpg"] },
+            "9": { desc: "Altocumulus of a chaotic sky, usually with heavy broken cloud sheets at different levels", credit: "photo by R.K. Pilsbury (Crown copyright)", images: ["clouds/cm9.jpg"] },
             "0": { desc: "No CM clouds", credit: "", images: [] },
             "/": { desc: "Not determined", credit: "", images: [] }
         }
@@ -580,12 +592,12 @@ const CLOUD_DETAILS = {
             "1": { desc: "Cirrus filaments, strands, hooks, not expanding.", credit: "photo by R.K. Pilsbury (Crown copyright)", images: ["clouds/ch1.jpg"] },
             "2": { desc: "Dense cirrus in patches or sheaves, not increasing, or cirrus like cumuliform tufts.", credit: "photo by R.K. Pilsbury (Crown copyright)", images: ["clouds/ch2.jpg"] },
             "3": { desc: "Dense cirrus, often the anvil remaining from cumulonimbus. ", credit: "photo by R.K. Pilsbury (Crown copyright)", images: ["clouds/ch3.jpg"] },
-            "4": { desc: "Cirrus in the form of hooks or of filaments, or both (no Cirrostratus present); progressively invading the sky; generally, become denser as a whole", credit: "photo by R.K. Pilsbury (Crown copyright)", images: ["clouds/ch4.jpg"] },
-            "5": { desc: "Cirrus (often in bands) and Cirrostratus, or Cirrostratus alone; progressively invading the sky; generally growing denser as a whole; continuous veil does not reach 45 degrees above the horizon", credit: "photo KNMI", images: ["clouds/ch5.jpg"] },
-            "6": { desc: "Cirrus (often in bands) and Cirrostratus, or Cirrostratus alone; progressively invading the sky; generally growing denser as a whole; continuous veil extends more than 45 degrees above the horizon; sky not being totally covered", credit: "photo KNMI", images: ["clouds/ch6.jpg"] },
+            "4": { desc: "Cirrus hooks or filaments, increasing, becoming denser as a whole", credit: "photo by R.K. Pilsbury (Crown copyright)", images: ["clouds/ch4.jpg"] },
+            "5": { desc: "Cirrus bands and/or cirrostratus, increasing, growing denser, veil below 45°", credit: "photo KNMI", images: ["clouds/ch5.jpg"] },
+            "6": { desc: "Cirrus bands and/or cirrostratus, increasing, growing denser, veil above 45°", credit: "photo KNMI", images: ["clouds/ch6.jpg"] },
             "7": { desc: "Cirrostratus covering the whole sky; it gives rise to Halo phenomena around the sun or moon", credit: "photo by B. Muehr", images: ["clouds/ch7.jpg"] },
             "8": { desc: "Cirrostratus; not progressively invading the sky; not covering the whole sky", credit: "photo Australian Bureau of Meteorology", images: ["clouds/ch8.jpg"] },
-            "9": { desc: "Amount of Cirrocumulus is greater than any other types of Cirrus / Cirrostratus which may be present", credit: "photo Australian Bureau of Meteorology", images: ["clouds/ch9.jpg"] },
+            "9": { desc: "Cirrocumulus alone, and/or cirrus and cirrostratus", credit: "photo Australian Bureau of Meteorology", images: ["clouds/ch9.jpg"] },
             "0": { desc: "No CH clouds", credit: "", images: [] },
             "/": { desc: "Not determined", credit: "", images: [] }
         }

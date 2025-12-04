@@ -72,6 +72,14 @@ class ReportStore {
         let isValid = true;
         const formData = this.state.formData;
 
+        // Special skip logic for Sea Ice
+        if (group.id === 'ice_data') {
+            const iceConc = formData['ice_conc'];
+            if (iceConc === '/' || iceConc === undefined) {
+                return '...';
+            }
+        }
+
         for (const field of group.fields) {
             if (field.excludeFromCode) continue;
 
@@ -121,14 +129,14 @@ class ReportStore {
         let wetBulbGroup = null;
         let marineHeaderCode = '';
 
-        REPORT_STRUCTURE.forEach(group => {
+        // Create a sorted copy of the structure based on wmoOrder
+        const sortedStructure = [...REPORT_STRUCTURE].sort((a, b) => {
+            return (a.wmoOrder || 0) - (b.wmoOrder || 0);
+        });
+
+        sortedStructure.forEach(group => {
             // Skip logic for Present & Past Weather
             if (group.id === 'present_past_weather' && this.state.formData['weather_indicator'] === '2') {
-                return;
-            }
-
-            // Skip logic for Sea Ice
-            if (group.id === 'ice_data' && (this.state.formData['ice_conc'] === '/' || this.state.formData['ice_conc'] === undefined)) {
                 return;
             }
 
