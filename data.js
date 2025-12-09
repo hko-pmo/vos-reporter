@@ -171,7 +171,10 @@ const REPORT_STRUCTURE = [
         customComponent: 'pressure-tendency-input',
         fields: [
             { id: 'pressure_tendency_code', type: 'computed', label: 'Code' },
-            { id: 'pt_correction', type: 'number', label: 'Barometer Correction', hidden: true, persist: true, excludeFromCode: true },
+            { id: 'pt_correction', type: 'number', label: 'Instrument Correction', hidden: true, persist: true, excludeFromCode: true },
+            { id: 'pt_is_msl', type: 'text', label: 'Is MSL Corrected', hidden: true, persist: true, excludeFromCode: true },
+            { id: 'pt_keel_dist', type: 'number', label: 'Keel-Barometer Distance', hidden: true, persist: true, excludeFromCode: true },
+            { id: 'pt_draft', type: 'number', label: 'Deepest Draft', hidden: true, excludeFromCode: true },
             { id: 'pt_height', type: 'number', label: 'Height of Barometer', hidden: true, excludeFromCode: true }
         ]
     },

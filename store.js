@@ -57,6 +57,14 @@ class ReportStore {
         if (savedPtCorrection) {
             this.state.formData['pt_correction'] = savedPtCorrection;
         }
+        const savedPtIsMsl = localStorage.getItem('vos_pt_is_msl');
+        if (savedPtIsMsl) {
+            this.state.formData['pt_is_msl'] = savedPtIsMsl;
+        }
+        const savedPtKeelDist = localStorage.getItem('vos_pt_keel_dist');
+        if (savedPtKeelDist) {
+            this.state.formData['pt_keel_dist'] = savedPtKeelDist;
+        }
     }
 
     getFormData() {

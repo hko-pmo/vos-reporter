@@ -453,7 +453,9 @@ function renderReviewScreen() {
                 'wind_indicator', 
                 'th_mode', 
                 'sst_method', 
-                'pt_correction'
+                'pt_correction',
+                'pt_is_msl',
+                'pt_keel_dist'
             ];
 
             preservedKeys.forEach(key => {

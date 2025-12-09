@@ -35,3 +35,41 @@ A Progressive Web Application (PWA) designed for Voluntary Observing Ships (VOS)
 ## Customization
 
 The report structure is defined in `data.js`. You can modify `REPORT_STRUCTURE` to add/remove fields or change validation rules.
+
+## Reference: FM 13 SHIP Data Structure
+
+The report is constructed of 5-character groups.
+
+### Section 0: Identification (Mandatory)
+1.  **BBXX**: Fixed identifier.
+2.  **CALLSIGN**: Ship's callsign (Saved in local storage).
+3.  **YYGGiw**:
+    *   `YY`: Day of month (01-31).
+    *   `GG`: Hour (00, 06, 12, 18, etc.).
+    *   `iw`: Wind speed indicator (Default/Selectable).
+4.  **99LaLaLa**: Latitude.
+    *   `99`: Fixed.
+    *   `LaLaLa`: Lat x 10.
+5.  **QcLoLoLoLo**: Longitude.
+    *   `Qc`: Quadrant (1=NE, 3=SE, 5=SW, 7=NW).
+    *   `LoLoLoLo`: Long x 10.
+
+### Section 1: Meteorological Data
+6.  **4ixhVV**: Precipitation/Cloud Base/Visibility.
+7.  **Nddff**: Cloud Cover/Wind.
+8.  **1snTTT**: Air Temperature.
+9.  **2snTdTdTd**: Dew Point.
+10. **4PPPP**: Pressure.
+11. **5appp**: Pressure Tendency.
+12. **7wwW1W2**: Present & Past Weather.
+13. **8NhCLCMCH**: Cloud Types.
+
+### Section 2: Marine Data
+*Starts with `222DsVs`*
+14. **222DsVs**: Ship Course & Speed.
+15. **0ssTwTwTw**: Sea Surface Temp.
+16. **2PwPwHwHw**: Wind Waves.
+17. **3dw1dw1dw2dw2**: Swell Direction.
+18. **4Pw1Pw1Hw1Hw1**: Primary Swell.
+19. **5Pw2Pw2Hw2Hw2**: Secondary Swell.
+20. **6IsEsEsRs**: Ice Accretion.

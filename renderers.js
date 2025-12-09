@@ -740,27 +740,96 @@ const Renderers = {
             return { wrapper, inp };
         };
 
+        // --- Row 1: Reading & Correction ---
+        const row1 = document.createElement('div');
+        row1.style.display = 'flex';
+        row1.style.gap = '1rem';
+        row1.style.marginBottom = '0.5rem';
+
         // 1. Barometer Reading
         const pressInput = createInput('pt_pressure', 'Barometer reading [860.0 - 1070.0 hPa]', 'number', '100%', 'e.g. 1014.2. Leave empty if not measured.', 860.0, 1070.0);
-        container.appendChild(pressInput.wrapper);
+        pressInput.wrapper.style.flex = '1';
+        row1.appendChild(pressInput.wrapper);
 
-        // 2. Barometer Correction
-        const corrInput = createInput('pt_correction', 'Barometer (instrument) correction [-8.0 to +8.0 hPa]', 'number', '100%', 'Correction to remove systematic bias.', -8.0, 8.0);
+        // 2. Instrument Correction
+        const corrInput = createInput('pt_correction', 'Instrument correction [-8.0 to +8.0 hPa]', 'number', '100%', 'Correction to remove systematic bias.', -8.0, 8.0);
+        corrInput.wrapper.style.flex = '1';
         corrInput.inp.addEventListener('change', (e) => {
             localStorage.setItem('vos_pt_correction', e.target.value);
         });
-        container.appendChild(corrInput.wrapper);
+        row1.appendChild(corrInput.wrapper);
+        
+        container.appendChild(row1);
 
-        // 3. Height of Barometer
-        const heightInput = createInput('pt_height', 'Height of Barometer [0 - 60 m]', 'number', '100%', 'Height above sea level. 0 means your reading is already corrected to MSL.', 0, 60, '0.1');
-        // Default to 0 if empty? The user said "0 (as the default) means...". 
-        // But if it's empty in formData, we might want to show 0 or treat as 0.
-        // Let's set default value in UI if empty.
-        if (!formData['pt_height']) {
-            heightInput.inp.value = '0';
-            store.updateFormData('pt_height', '0');
-        }
-        container.appendChild(heightInput.wrapper);
+        // --- Row 2: MSL Question ---
+        const mslWrapper = document.createElement('div');
+        mslWrapper.className = 'input-group';
+        const mslLabel = document.createElement('label');
+        mslLabel.textContent = 'Is this barometer reading already corrected to Mean Sea Level?';
+        mslWrapper.appendChild(mslLabel);
+
+        const mslOptionsDiv = document.createElement('div');
+        mslOptionsDiv.style.display = 'flex';
+        mslOptionsDiv.style.gap = '1rem';
+
+        ['no', 'yes'].forEach(val => {
+            const optDiv = document.createElement('div');
+            optDiv.style.display = 'flex';
+            optDiv.style.alignItems = 'center';
+
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = 'pt_is_msl';
+            radio.value = val;
+            radio.id = `pt_is_msl_${val}`;
+            // Default to 'no' if undefined
+            radio.checked = (formData['pt_is_msl'] || 'no') === val;
+            
+            radio.addEventListener('change', (e) => {
+                store.updateFormData('pt_is_msl', e.target.value);
+                localStorage.setItem('vos_pt_is_msl', e.target.value);
+                updateVisibility();
+                updateValues();
+            });
+
+            const lbl = document.createElement('label');
+            lbl.htmlFor = `pt_is_msl_${val}`;
+            lbl.textContent = val === 'yes' ? 'Yes' : 'No';
+            lbl.style.fontWeight = 'normal';
+            lbl.style.marginLeft = '0.5rem';
+            lbl.style.marginBottom = '0'; // Reset margin
+
+            optDiv.appendChild(radio);
+            optDiv.appendChild(lbl);
+            mslOptionsDiv.appendChild(optDiv);
+        });
+        mslWrapper.appendChild(mslOptionsDiv);
+        container.appendChild(mslWrapper);
+
+        // --- Row 3: Height Calculation (Only if No) ---
+        const heightCalcContainer = document.createElement('div');
+        
+        // Box 1: Keel to Barometer
+        const keelInput = createInput('pt_keel_dist', 'Distance between bottom of the keel to the barometer [10 - 60 m]', 'number', '100%', 'Height of barometer above SSL + Distance of bottom of keel to SSL.', 10, 60, '0.1');
+        keelInput.inp.addEventListener('change', (e) => {
+            localStorage.setItem('vos_pt_keel_dist', e.target.value);
+        });
+        heightCalcContainer.appendChild(keelInput.wrapper);
+
+        // Box 2: Deepest Draft
+        const draftInput = createInput('pt_draft', 'Current deepest draft [0.0 - 50.0 m]', 'number', '100%', '', 0, 50, '0.1');
+        heightCalcContainer.appendChild(draftInput.wrapper);
+
+        // Debug/Info for calculated height
+        const heightInfo = document.createElement('div');
+        heightInfo.style.fontSize = '0.85rem';
+        heightInfo.style.color = '#666';
+        heightInfo.style.marginBottom = '1rem';
+        heightInfo.style.fontStyle = 'italic';
+        heightInfo.textContent = 'Calculated Height of Barometer: -- m';
+        heightCalcContainer.appendChild(heightInfo);
+
+        container.appendChild(heightCalcContainer);
 
         // Debug Box for Corrected Pressure
         const debugBox = document.createElement('div');
@@ -817,6 +886,16 @@ const Renderers = {
 
         function updateVisibility() {
             const fd = store.getFormData();
+            
+            // MSL Visibility
+            const isMsl = fd['pt_is_msl'] || 'no';
+            if (isMsl === 'yes') {
+                heightCalcContainer.style.display = 'none';
+            } else {
+                heightCalcContainer.style.display = 'block';
+            }
+
+            // Tendency Visibility
             const charVal = fd['pt_char'] || 'not_measured';
             if (charVal === 'not_measured') {
                 amountInput.inp.disabled = true;
@@ -853,8 +932,8 @@ const Renderers = {
             const fd = store.getFormData();
             const pressVal = parseFloat(fd['pt_pressure']);
             const corrVal = parseFloat(fd['pt_correction']);
-            const heightVal = parseFloat(fd['pt_height']);
             const airTempVal = parseFloat(fd['th_air_val']); // From previous section
+            const isMsl = fd['pt_is_msl'] || 'no';
 
             const charVal = fd['pt_char'] || 'not_measured';
             const amountVal = parseFloat(fd['pt_amount']);
@@ -869,21 +948,36 @@ const Renderers = {
                     pStation += corrVal;
                 }
 
-                // 2. Apply Height Correction (Reduction to MSL)
-                let h = 0;
-                if (!isNaN(heightVal)) {
-                    h = heightVal;
-                }
-
-                if (h > 0) {
-                    // Need Air Temp. Default to 20 if missing.
-                    let t = 20.0;
-                    if (!isNaN(airTempVal)) {
-                        t = airTempVal;
-                    }
-                    finalPressure = calculateMSLP(pStation, h, t);
-                } else {
+                if (isMsl === 'yes') {
+                    // Already MSL
                     finalPressure = pStation;
+                    heightInfo.textContent = 'Calculated Height of Barometer: N/A (Already MSL)';
+                } else {
+                    // Calculate Height
+                    const keelDist = parseFloat(fd['pt_keel_dist']);
+                    const draft = parseFloat(fd['pt_draft']);
+                    let h = 0;
+                    
+                    if (!isNaN(keelDist) && !isNaN(draft)) {
+                        h = keelDist - draft;
+                        // Store calculated height for reference/debug
+                        store.updateFormData('pt_height', h.toFixed(1));
+                        heightInfo.textContent = `Calculated Height of Barometer: ${h.toFixed(1)} m`;
+                    } else {
+                        heightInfo.textContent = 'Calculated Height of Barometer: -- m';
+                    }
+
+                    // 2. Apply Height Correction (Reduction to MSL)
+                    if (h > 0) {
+                        // Need Air Temp. Default to 20 if missing.
+                        let t = 20.0;
+                        if (!isNaN(airTempVal)) {
+                            t = airTempVal;
+                        }
+                        finalPressure = calculateMSLP(pStation, h, t);
+                    } else {
+                        finalPressure = pStation;
+                    }
                 }
 
                 // Update Debug Box
