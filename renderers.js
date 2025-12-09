@@ -768,42 +768,32 @@ const Renderers = {
         mslLabel.textContent = 'Is this barometer reading already corrected to Mean Sea Level?';
         mslWrapper.appendChild(mslLabel);
 
-        const mslOptionsDiv = document.createElement('div');
-        mslOptionsDiv.style.display = 'flex';
-        mslOptionsDiv.style.gap = '1rem';
+        const mslSelect = document.createElement('select');
+        mslSelect.id = 'pt_is_msl';
+        
+        const mslOptions = [
+            { value: 'no', label: 'No' },
+            { value: 'yes', label: 'Yes' }
+        ];
 
-        ['no', 'yes'].forEach(val => {
-            const optDiv = document.createElement('div');
-            optDiv.style.display = 'flex';
-            optDiv.style.alignItems = 'center';
-
-            const radio = document.createElement('input');
-            radio.type = 'radio';
-            radio.name = 'pt_is_msl';
-            radio.value = val;
-            radio.id = `pt_is_msl_${val}`;
-            // Default to 'no' if undefined
-            radio.checked = (formData['pt_is_msl'] || 'no') === val;
-            
-            radio.addEventListener('change', (e) => {
-                store.updateFormData('pt_is_msl', e.target.value);
-                localStorage.setItem('vos_pt_is_msl', e.target.value);
-                updateVisibility();
-                updateValues();
-            });
-
-            const lbl = document.createElement('label');
-            lbl.htmlFor = `pt_is_msl_${val}`;
-            lbl.textContent = val === 'yes' ? 'Yes' : 'No';
-            lbl.style.fontWeight = 'normal';
-            lbl.style.marginLeft = '0.5rem';
-            lbl.style.marginBottom = '0'; // Reset margin
-
-            optDiv.appendChild(radio);
-            optDiv.appendChild(lbl);
-            mslOptionsDiv.appendChild(optDiv);
+        mslOptions.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.textContent = opt.label;
+            mslSelect.appendChild(option);
         });
-        mslWrapper.appendChild(mslOptionsDiv);
+
+        // Default to 'no' if undefined
+        mslSelect.value = formData['pt_is_msl'] || 'no';
+
+        mslSelect.addEventListener('change', (e) => {
+            store.updateFormData('pt_is_msl', e.target.value);
+            localStorage.setItem('vos_pt_is_msl', e.target.value);
+            updateVisibility();
+            updateValues();
+        });
+
+        mslWrapper.appendChild(mslSelect);
         container.appendChild(mslWrapper);
 
         // --- Row 3: Height Calculation (Only if No) ---
@@ -873,7 +863,16 @@ const Renderers = {
         });
         charSelect.value = formData['pt_char'] || 'not_measured';
         charSelect.addEventListener('change', (e) => {
-            store.updateFormData('pt_char', e.target.value);
+            const val = e.target.value;
+            store.updateFormData('pt_char', val);
+            
+            if (val === '4') {
+                store.updateFormData('pt_amount', '0');
+                if (typeof amountInput !== 'undefined') {
+                    amountInput.inp.value = '0';
+                }
+            }
+
             updateVisibility();
             updateValues();
         });
