@@ -460,7 +460,7 @@ const REPORT_STRUCTURE = [
                     { value: '2', label: '2: Sea ice present in concentrations less than 3/8; open water or very open pack ice' },
                     { value: '3', label: '3: 3/8 to less than 6/8; open pack ice' },
                     { value: '4', label: '4: 6/8 to less than 7/8; close pack ice' },
-                    { value: '5', label: '5: 7/8 to less than 8/8); very close pack ice' },
+                    { value: '5', label: '5: 7/8 to less than 8/8; very close pack ice' },
                     { value: '6', label: '6: Strips and patches of pack ice with open water between' },
                     { value: '7', label: '7: Strips and patches of close or very close pack ice with areas of lesser concentration between' },
                     { value: '8', label: '8: Fast ice with open water, very open or open pack ice to seaward of the ice boundary' },
