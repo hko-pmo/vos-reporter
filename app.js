@@ -128,6 +128,10 @@ function renderStep() {
                 inputGroup.style.order = field.uiOrder;
             }
 
+            if (field.persist) {
+                inputGroup.classList.add('cached');
+            }
+
             const label = document.createElement('label');
             label.textContent = field.label;
             label.htmlFor = field.id;

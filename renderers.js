@@ -413,6 +413,7 @@ const Renderers = {
 
         const modeWrapper = document.createElement('div');
         modeWrapper.className = 'input-group';
+        modeWrapper.classList.add('cached');
         const modeLabel = document.createElement('label');
         modeLabel.textContent = 'Humidity Measurement';
         modeWrapper.appendChild(modeLabel);
@@ -754,6 +755,7 @@ const Renderers = {
         // 2. Instrument Correction
         const corrInput = createInput('pt_correction', 'Instrument correction [-8.0 to +8.0 hPa]', 'number', '100%', 'Correction to remove systematic bias.', -8.0, 8.0);
         corrInput.wrapper.style.flex = '1';
+        corrInput.wrapper.classList.add('cached');
         corrInput.inp.addEventListener('change', (e) => {
             localStorage.setItem('vos_pt_correction', e.target.value);
         });
@@ -764,6 +766,7 @@ const Renderers = {
         // --- Row 2: MSL Question ---
         const mslWrapper = document.createElement('div');
         mslWrapper.className = 'input-group';
+        mslWrapper.classList.add('cached');
         const mslLabel = document.createElement('label');
         mslLabel.textContent = 'Is this barometer reading already corrected to Mean Sea Level?';
         mslWrapper.appendChild(mslLabel);
@@ -801,6 +804,7 @@ const Renderers = {
         
         // Box 1: Keel to Barometer
         const keelInput = createInput('pt_keel_dist', 'Distance between bottom of the keel to the barometer [10 - 60 m]', 'number', '100%', 'Height of barometer above SSL + Distance of bottom of keel to SSL.', 10, 60, '0.1');
+        keelInput.wrapper.classList.add('cached');
         keelInput.inp.addEventListener('change', (e) => {
             localStorage.setItem('vos_pt_keel_dist', e.target.value);
         });
@@ -1305,6 +1309,7 @@ const Renderers = {
 
         const methodWrapper = document.createElement('div');
         methodWrapper.className = 'input-group';
+        methodWrapper.classList.add('cached');
         const methodLabel = document.createElement('label');
         methodLabel.textContent = 'Method (ss)';
         methodWrapper.appendChild(methodLabel);

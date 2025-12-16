@@ -4,6 +4,7 @@
     --text-color: #333;
     --border-color: #ccc;
     --success-color: #28a745;
+    --success-color-rgb: 40, 167, 69;
 }
 
 * {
@@ -75,6 +76,25 @@ main {
 
 .input-group {
     margin-bottom: 1.5rem;
+}
+
+/* Subtle marker for fields cached in localStorage */
+.input-group.cached {
+    position: relative;
+    padding-left: 0.75rem;
+    margin-left: -0.75rem;
+}
+
+.input-group.cached::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: rgba(var(--success-color-rgb), 0.45);
+    border-radius: 4px;
+    pointer-events: none;
 }
 
 .input-group label {
