@@ -19,6 +19,27 @@ A Progressive Web Application (PWA) designed for Voluntary Observing Ships (VOS)
 4.  **Review**: Check the generated code. Click "Edit" to modify any group or "Add" to include skipped groups (like Swell or Ice).
 5.  **Copy**: Click "Copy to Clipboard" to get the final code string for transmission.
 
+## Low-Bandwidth / Shipboard Notes
+
+- **Very small app payload**: The core app is plain HTML/CSS/JS with small built-in images for cloud charts.
+- **Offline use**: This is a PWA. After the first successful load, core files are cached by the Service Worker.
+- **Cloud charts are on-demand**: Cloud chart images are cached the first time you open them. If you need them fully offline, open the cloud chart modal once while you have connectivity.
+- **Updates**: When online, the app checks for updates and refreshes cached files based on the app version.
+
+## Cached Inputs (Saved Settings)
+
+Some inputs are intentionally **cached in the browser (localStorage)** to reduce repeated typing between reports.
+
+- **UI indicator**: Inputs with a subtle green bar on the left are **saved on this device** and will be auto-filled next time.
+- **Examples of cached inputs** (may expand over time):
+    - Callsign, email recipient
+    - Wind indicator
+    - Humidity measurement mode
+    - Sea surface temperature method
+    - Pressure step: instrument correction, “Already corrected to MSL?”, keel-to-barometer distance
+- **Examples of NOT cached inputs**:
+    - Values that change per observation (e.g., time, position, current draft)
+
 ## Technical Details
 
 - **Stack**: HTML5, CSS3, Vanilla JavaScript.
