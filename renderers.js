@@ -134,7 +134,7 @@ const Renderers = {
 
         // --- Ship Course & Speed ---
         const marineHeader = document.createElement('h3');
-        marineHeader.textContent = 'Ship Course & Speed';
+        marineHeader.textContent = 'Ship Course & Speed (last 3 hours)';
         marineHeader.style.marginTop = '1.5rem';
         marineHeader.style.marginBottom = '0.5rem';
         marineHeader.style.fontSize = '1rem';
