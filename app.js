@@ -86,16 +86,35 @@ function renderStep() {
     groupDiv.className = 'group-container';
 
     // Title & Description
-    const title = document.createElement('h2');
-    title.className = 'group-title';
-    title.textContent = group.name;
-    groupDiv.appendChild(title);
+    if (group.id === 'identification') {
+        const instructionTitle = document.createElement('h2');
+        instructionTitle.className = 'group-title';
+        instructionTitle.textContent = 'Instruction';
+        groupDiv.appendChild(instructionTitle);
 
-    if (group.description) {
-        const desc = document.createElement('p');
-        desc.className = 'group-description';
-        desc.textContent = group.description;
-        groupDiv.appendChild(desc);
+        if (group.description) {
+            const desc = document.createElement('p');
+            desc.className = 'group-description';
+            desc.textContent = group.description;
+            groupDiv.appendChild(desc);
+        }
+
+        const title = document.createElement('h2');
+        title.className = 'group-title';
+        title.textContent = group.name;
+        groupDiv.appendChild(title);
+    } else {
+        const title = document.createElement('h2');
+        title.className = 'group-title';
+        title.textContent = group.name;
+        groupDiv.appendChild(title);
+
+        if (group.description) {
+            const desc = document.createElement('p');
+            desc.className = 'group-description';
+            desc.textContent = group.description;
+            groupDiv.appendChild(desc);
+        }
     }
 
     // Custom Component Rendering
