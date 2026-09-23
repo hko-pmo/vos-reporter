@@ -884,7 +884,7 @@ const Renderers = {
         container.appendChild(charWrapper);
 
         // 5. Amount of Change
-        const amountInput = createInput('pt_amount', 'Amount of Change [0.0 - 50.0 hPa]', 'number', '100%', 'Change of pressure in last 3 hours, e.g. 1.4. No negative numbers. Use "Characteristic" to indicate minus sign.', 0.0, 50.0);
+        const amountInput = createInput('pt_amount', 'Amount of Change [0.0 - 50.0 hPa]', 'number', '100%', 'Change of pressure in last 3 hours, e.g. 1.4. No negative numbers. Use the "Decreasing" options in the "Pressure Tendency Characteristic" to indicate minus sign.', 0.0, 50.0);
         container.appendChild(amountInput.wrapper);
 
         function updateVisibility() {
