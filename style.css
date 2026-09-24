@@ -28,11 +28,52 @@ header {
     padding: 1rem;
     text-align: center;
     flex-shrink: 0;
+    position: relative;
+}
+
+.header-main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 10rem;
 }
 
 header h1 {
     margin: 0;
     font-size: 1.2rem;
+}
+
+.language-control {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+}
+
+.language-control select {
+    max-width: 10rem;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 4px;
+    background: white;
+    color: var(--text-color);
+    font: inherit;
+}
+
+@media (max-width: 700px) {
+    .header-main {
+        padding: 0;
+    }
+
+    .language-control {
+        position: static;
+        justify-content: center;
+        margin-top: 0.75rem;
+        transform: none;
+    }
 }
 
 #step-indicator {

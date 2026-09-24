@@ -7,7 +7,7 @@ const Renderers = {
             wrapper.style.marginRight = '1rem';
             
             const lbl = document.createElement('label');
-            lbl.textContent = label;
+            lbl.textContent = I18n.t(label);
             lbl.style.display = 'block';
             lbl.style.fontSize = '0.8rem';
             wrapper.appendChild(lbl);
@@ -52,7 +52,7 @@ const Renderers = {
                 });
 
                 const lbl = document.createElement('label');
-                lbl.textContent = opt.label;
+                lbl.textContent = I18n.t(opt.label);
                 lbl.style.marginLeft = '0.3rem';
                 lbl.style.fontWeight = 'normal';
                 
@@ -66,7 +66,7 @@ const Renderers = {
         // Latitude Row
         const latRow = document.createElement('div');
         latRow.className = 'input-group';
-        latRow.innerHTML = '<label>Latitude</label>';
+        latRow.innerHTML = `<label>${I18n.t('Latitude')}</label>`;
         const latFlex = document.createElement('div');
         latFlex.style.display = 'flex';
         latFlex.style.alignItems = 'center';
@@ -92,7 +92,7 @@ const Renderers = {
         // Longitude Row
         const longRow = document.createElement('div');
         longRow.className = 'input-group';
-        longRow.innerHTML = '<label>Longitude</label>';
+        longRow.innerHTML = `<label>${I18n.t('Longitude')}</label>`;
         const longFlex = document.createElement('div');
         longFlex.style.display = 'flex';
         longFlex.style.alignItems = 'center';
@@ -122,8 +122,8 @@ const Renderers = {
             inp.addEventListener('input', () => {
                 const val = parseFloat(inp.value);
                 if (!isNaN(val)) {
-                    if (inp.min && val < parseFloat(inp.min)) inp.setCustomValidity(`Min ${inp.min}`);
-                    else if (inp.max && val > parseFloat(inp.max)) inp.setCustomValidity(`Max ${inp.max}`);
+                    if (inp.min && val < parseFloat(inp.min)) inp.setCustomValidity(I18n.t('Min {limit}', { limit: inp.min }));
+                    else if (inp.max && val > parseFloat(inp.max)) inp.setCustomValidity(I18n.t('Max {limit}', { limit: inp.max }));
                     else inp.setCustomValidity('');
                 } else {
                     inp.setCustomValidity('');
@@ -134,7 +134,7 @@ const Renderers = {
 
         // --- Ship Course & Speed ---
         const marineHeader = document.createElement('h3');
-        marineHeader.textContent = 'Ship Course & Speed (last 3 hours)';
+        marineHeader.textContent = I18n.t('Ship Course & Speed (last 3 hours)');
         marineHeader.style.marginTop = '1.5rem';
         marineHeader.style.marginBottom = '0.5rem';
         marineHeader.style.fontSize = '1rem';
@@ -145,7 +145,7 @@ const Renderers = {
             const wrapper = document.createElement('div');
             wrapper.className = 'input-group';
             const lbl = document.createElement('label');
-            lbl.textContent = label;
+            lbl.textContent = I18n.t(label);
             wrapper.appendChild(lbl);
             
             const sel = document.createElement('select');
@@ -153,7 +153,7 @@ const Renderers = {
             options.forEach(opt => {
                 const o = document.createElement('option');
                 o.value = opt.value;
-                o.textContent = opt.label;
+                o.textContent = I18n.t(opt.label);
                 sel.appendChild(o);
             });
             sel.value = formData[id] || '/';
@@ -244,7 +244,7 @@ const Renderers = {
             const wrapper = document.createElement('div');
             wrapper.className = 'input-group';
             const lbl = document.createElement('label');
-            lbl.textContent = field.label;
+            lbl.textContent = I18n.t(field.label);
             wrapper.appendChild(lbl);
             
             const inp = document.createElement('input');
@@ -269,17 +269,17 @@ const Renderers = {
         const dirWrapper = document.createElement('div');
         dirWrapper.className = 'input-group';
         const dirLabel = document.createElement('label');
-        dirLabel.textContent = 'True Wind Direction (dd)';
+        dirLabel.textContent = I18n.t('True Wind Direction (dd)');
         dirWrapper.appendChild(dirLabel);
 
         const dirInput = document.createElement('input');
         dirInput.type = 'text'; // Allow text for "Calm", "Var"
-        dirInput.placeholder = 'Degrees (0-360) or 0=Calm, 99=Var';
+        dirInput.placeholder = I18n.t('Degrees (0-360) or 0=Calm, 99=Var');
         
         // Initial Value Logic
         const currentDir = formData['wind_dir'];
-        if (currentDir === '0' || currentDir === '00') dirInput.value = 'Calm (0)';
-        else if (currentDir === '99') dirInput.value = 'Variable (99)';
+        if (currentDir === '0' || currentDir === '00') dirInput.value = I18n.t('Calm (0)');
+        else if (currentDir === '99') dirInput.value = I18n.t('Variable (99)');
         else if (currentDir) {
             // Convert tens back to degrees for display (approx)
             dirInput.value = `${parseInt(currentDir) * 10}`; 
@@ -290,12 +290,12 @@ const Renderers = {
             let code = '';
             let display = '';
 
-            if (val === 'calm' || val === '0' || val === '00') {
+            if (val === 'calm' || val === I18n.t('Calm (0)').toLowerCase() || val === '0' || val === '00') {
                 code = '00';
-                display = 'Calm (0)';
-            } else if (val === 'var' || val === 'variable' || val === '99') {
+                display = I18n.t('Calm (0)');
+            } else if (val === 'var' || val === 'variable' || val === I18n.t('Variable (99)').toLowerCase() || val === '99') {
                 code = '99';
-                display = 'Variable (99)';
+                display = I18n.t('Variable (99)');
             } else {
                 const num = parseFloat(val);
                 if (!isNaN(num)) {
@@ -313,18 +313,18 @@ const Renderers = {
                                 // If input is small number, maybe they meant tens?
                                 // We assume DEGREES.
                                 code = '00'; 
-                                display = 'Calm (0)';
+                                display = I18n.t('Calm (0)');
                             } else {
                                 code = tens.toString().padStart(2, '0');
-                                display = `${num}° (Code: ${code})`;
+                                display = I18n.t('{degrees}° (Code: {code})', { degrees: num, code });
                             }
                         } else {
                             code = tens.toString().padStart(2, '0');
-                            display = `${num}° (Code: ${code})`;
+                            display = I18n.t('{degrees}° (Code: {code})', { degrees: num, code });
                         }
                     } else {
                         // Invalid
-                        alert('Direction must be 0-360');
+                        alert(I18n.t('Direction must be 0-360'));
                         e.target.value = '';
                         return;
                     }
@@ -351,7 +351,7 @@ const Renderers = {
         dirWrapper.appendChild(dirInput);
         const dirHelp = document.createElement('div');
         dirHelp.className = 'help-text';
-        dirHelp.textContent = 'Input degrees (0-360). 0=Calm, 99=Variable. Auto-converts to tens.';
+        dirHelp.textContent = I18n.t('Input degrees (0-360). 0=Calm, 99=Variable. Auto-converts to tens.');
         dirWrapper.appendChild(dirHelp);
         container.appendChild(dirWrapper);
 
@@ -368,7 +368,7 @@ const Renderers = {
             wrapper.className = 'input-group';
             
             const lbl = document.createElement('label');
-            lbl.textContent = label;
+            lbl.textContent = I18n.t(label);
             lbl.htmlFor = id;
             wrapper.appendChild(lbl);
 
@@ -386,9 +386,9 @@ const Renderers = {
                 if (type === 'number' && val !== '') {
                     const numVal = parseFloat(val);
                     if (min !== undefined && numVal < min) {
-                        inp.setCustomValidity(`Value must be >= ${min}`);
+                        inp.setCustomValidity(I18n.t('Value must be >= {limit}', { limit: min }));
                     } else if (max !== undefined && numVal > max) {
-                        inp.setCustomValidity(`Value must be <= ${max}`);
+                        inp.setCustomValidity(I18n.t('Value must be <= {limit}', { limit: max }));
                     } else {
                         inp.setCustomValidity('');
                     }
@@ -402,7 +402,7 @@ const Renderers = {
             if (help) {
                 const h = document.createElement('div');
                 h.className = 'help-text';
-                h.textContent = help;
+                h.textContent = I18n.t(help);
                 wrapper.appendChild(h);
             }
             return { wrapper, inp };
@@ -415,7 +415,7 @@ const Renderers = {
         modeWrapper.className = 'input-group';
         modeWrapper.classList.add('cached');
         const modeLabel = document.createElement('label');
-        modeLabel.textContent = 'Humidity Measurement';
+        modeLabel.textContent = I18n.t('Humidity Measurement');
         modeWrapper.appendChild(modeLabel);
 
         const modeSelect = document.createElement('select');
@@ -428,7 +428,7 @@ const Renderers = {
         modes.forEach(m => {
             const opt = document.createElement('option');
             opt.value = m.value;
-            opt.textContent = m.label;
+            opt.textContent = I18n.t(m.label);
             modeSelect.appendChild(opt);
         });
         modeSelect.value = formData['th_mode'] || 'none';
@@ -453,7 +453,7 @@ const Renderers = {
         debugBox.style.borderRadius = '4px';
         debugBox.style.fontSize = '0.9rem';
         debugBox.style.color = '#333';
-        debugBox.textContent = 'Calculated Dew Point: --';
+        debugBox.textContent = I18n.t('Calculated Dew Point: --');
         container.appendChild(debugBox);
 
         function updateVisibility() {
@@ -465,11 +465,11 @@ const Renderers = {
                 humVal.wrapper.style.display = 'block';
                 const label = humVal.wrapper.querySelector('label');
                 if (mode === 'wetbulb') {
-                    label.textContent = 'Wet-bulb Temperature [-50.0 - 50.0°C]';
+                    label.textContent = I18n.t('Wet-bulb Temperature [-50.0 - 50.0°C]');
                     humVal.inp.min = '-50.0';
                     humVal.inp.max = '50.0';
                 } else {
-                    label.textContent = 'Relative Humidity [0.0 - 100.0 %]';
+                    label.textContent = I18n.t('Relative Humidity [0.0 - 100.0 %]');
                     humVal.inp.min = '0';
                     humVal.inp.max = '100';
                 }
@@ -531,9 +531,9 @@ const Renderers = {
             }
 
             if (!isNaN(dewPoint)) {
-                debugBox.textContent = `Calculated Dew Point: ${dewPoint.toFixed(1)} °C`;
+                debugBox.textContent = I18n.t('Calculated Dew Point: {value} °C', { value: dewPoint.toFixed(1) });
             } else {
-                debugBox.textContent = 'Calculated Dew Point: --';
+                debugBox.textContent = I18n.t('Calculated Dew Point: --');
             }
 
             store.updateFormData('temp_humidity_code', code);
@@ -552,7 +552,7 @@ const Renderers = {
             const wrapper = document.createElement('div');
             wrapper.className = 'input-group';
             const lbl = document.createElement('label');
-            lbl.textContent = field.label;
+            lbl.textContent = I18n.t(field.label);
             wrapper.appendChild(lbl);
             
             const sel = document.createElement('select');
@@ -560,7 +560,7 @@ const Renderers = {
             field.options.forEach(opt => {
                 const o = document.createElement('option');
                 o.value = opt.value;
-                o.textContent = opt.label;
+                o.textContent = I18n.t(opt.label);
                 sel.appendChild(o);
             });
             sel.value = formData[field.id] || field.default || '';
@@ -572,7 +572,7 @@ const Renderers = {
             if (field.help) {
                 const h = document.createElement('div');
                 h.className = 'help-text';
-                h.textContent = field.help;
+                h.textContent = I18n.t(field.help);
                 wrapper.appendChild(h);
             }
             return wrapper;
@@ -583,7 +583,7 @@ const Renderers = {
         pwWrapper.className = 'input-group';
         
         const pwLabel = document.createElement('label');
-        pwLabel.textContent = 'Present Weather (ww)';
+        pwLabel.textContent = I18n.t('Present Weather (ww)');
         pwWrapper.appendChild(pwLabel);
 
         // Category Select
@@ -591,14 +591,14 @@ const Renderers = {
         catSelect.style.marginBottom = '0.5rem';
         // Add invalid styling support
         catSelect.addEventListener('change', () => {
-            if (catSelect.value === '') catSelect.setCustomValidity('Required');
+            if (catSelect.value === '') catSelect.setCustomValidity(I18n.t('Required'));
             else catSelect.setCustomValidity('');
         });
 
         PRESENT_WEATHER_CATEGORIES.forEach((cat, idx) => {
             const opt = document.createElement('option');
             opt.value = idx;
-            opt.textContent = cat.label;
+            opt.textContent = I18n.t(cat.label);
             catSelect.appendChild(opt);
         });
         
@@ -615,7 +615,7 @@ const Renderers = {
             if (cat.options.length === 1 && cat.options[0].value === '//') {
                  const o = document.createElement('option');
                  o.value = '//';
-                 o.textContent = '//: Not observed or not determined';
+                 o.textContent = I18n.t('//: Not observed or not determined');
                  codeSelect.appendChild(o);
                  codeSelect.disabled = true;
                  codeSelect.style.backgroundColor = '#e9ecef'; // Grey out
@@ -624,7 +624,7 @@ const Renderers = {
                  cat.options.forEach(opt => {
                     const o = document.createElement('option');
                     o.value = opt.value;
-                    o.textContent = opt.label;
+                    o.textContent = I18n.t(opt.label);
                     codeSelect.appendChild(o);
                  });
                  codeSelect.disabled = false;
@@ -679,7 +679,7 @@ const Renderers = {
         if (group.fields.find(f => f.id === 'present_weather').help) {
              const h = document.createElement('div');
              h.className = 'help-text';
-             h.textContent = group.fields.find(f => f.id === 'present_weather').help;
+             h.textContent = I18n.t(group.fields.find(f => f.id === 'present_weather').help);
              pwWrapper.appendChild(h);
         }
 
@@ -701,7 +701,7 @@ const Renderers = {
             wrapper.className = 'input-group';
             
             const lbl = document.createElement('label');
-            lbl.textContent = label;
+            lbl.textContent = I18n.t(label);
             lbl.htmlFor = id;
             wrapper.appendChild(lbl);
 
@@ -719,9 +719,9 @@ const Renderers = {
                 if (type === 'number' && val !== '') {
                     const numVal = parseFloat(val);
                     if (min !== undefined && numVal < min) {
-                        inp.setCustomValidity(`Value must be >= ${min}`);
+                        inp.setCustomValidity(I18n.t('Value must be >= {limit}', { limit: min }));
                     } else if (max !== undefined && numVal > max) {
-                        inp.setCustomValidity(`Value must be <= ${max}`);
+                        inp.setCustomValidity(I18n.t('Value must be <= {limit}', { limit: max }));
                     } else {
                         inp.setCustomValidity('');
                     }
@@ -735,7 +735,7 @@ const Renderers = {
             if (help) {
                 const h = document.createElement('div');
                 h.className = 'help-text';
-                h.textContent = help;
+                h.textContent = I18n.t(help);
                 wrapper.appendChild(h);
             }
             return { wrapper, inp };
@@ -768,7 +768,7 @@ const Renderers = {
         mslWrapper.className = 'input-group';
         mslWrapper.classList.add('cached');
         const mslLabel = document.createElement('label');
-        mslLabel.textContent = 'Is this barometer reading already corrected to Mean Sea Level?';
+        mslLabel.textContent = I18n.t('Is this barometer reading already corrected to Mean Sea Level?');
         mslWrapper.appendChild(mslLabel);
 
         const mslSelect = document.createElement('select');
@@ -782,7 +782,7 @@ const Renderers = {
         mslOptions.forEach(opt => {
             const option = document.createElement('option');
             option.value = opt.value;
-            option.textContent = opt.label;
+            option.textContent = I18n.t(opt.label);
             mslSelect.appendChild(option);
         });
 
@@ -820,7 +820,7 @@ const Renderers = {
         heightInfo.style.color = '#666';
         heightInfo.style.marginBottom = '1rem';
         heightInfo.style.fontStyle = 'italic';
-        heightInfo.textContent = 'Calculated Height of Barometer: -- m';
+        heightInfo.textContent = I18n.t('Calculated Height of Barometer: -- m');
         heightCalcContainer.appendChild(heightInfo);
 
         container.appendChild(heightCalcContainer);
@@ -835,14 +835,14 @@ const Renderers = {
         debugBox.style.borderRadius = '4px';
         debugBox.style.fontSize = '0.9rem';
         debugBox.style.color = '#0050b3';
-        debugBox.textContent = 'Final corrected MSL pressure: -- hPa';
+        debugBox.textContent = I18n.t('Final corrected MSL pressure: -- hPa');
         container.appendChild(debugBox);
 
         // 4. Tendency Characteristic
         const charWrapper = document.createElement('div');
         charWrapper.className = 'input-group';
         const charLabel = document.createElement('label');
-        charLabel.textContent = 'Pressure Tendency Characteristic';
+        charLabel.textContent = I18n.t('Pressure Tendency Characteristic');
         charWrapper.appendChild(charLabel);
 
         const charSelect = document.createElement('select');
@@ -862,7 +862,7 @@ const Renderers = {
         charOptions.forEach(opt => {
             const option = document.createElement('option');
             option.value = opt.value;
-            option.textContent = opt.label;
+            option.textContent = I18n.t(opt.label);
             charSelect.appendChild(option);
         });
         charSelect.value = formData['pt_char'] || 'not_measured';
@@ -954,7 +954,7 @@ const Renderers = {
                 if (isMsl === 'yes') {
                     // Already MSL
                     finalPressure = pStation;
-                    heightInfo.textContent = 'Calculated Height of Barometer: N/A (Already MSL)';
+                    heightInfo.textContent = I18n.t('Calculated Height of Barometer: N/A (Already MSL)');
                 } else {
                     // Calculate Height
                     const keelDist = parseFloat(fd['pt_keel_dist']);
@@ -965,9 +965,9 @@ const Renderers = {
                         h = keelDist - draft;
                         // Store calculated height for reference/debug
                         store.updateFormData('pt_height', h.toFixed(1));
-                        heightInfo.textContent = `Calculated Height of Barometer: ${h.toFixed(1)} m`;
+                        heightInfo.textContent = I18n.t('Calculated Height of Barometer: {value} m', { value: h.toFixed(1) });
                     } else {
-                        heightInfo.textContent = 'Calculated Height of Barometer: -- m';
+                        heightInfo.textContent = I18n.t('Calculated Height of Barometer: -- m');
                     }
 
                     // 2. Apply Height Correction (Reduction to MSL)
@@ -984,13 +984,13 @@ const Renderers = {
                 }
 
                 // Update Debug Box
-                debugBox.textContent = `Final corrected MSL pressure: ${finalPressure.toFixed(1)} hPa`;
+                debugBox.textContent = I18n.t('Final corrected MSL pressure: {value} hPa', { value: finalPressure.toFixed(1) });
 
                 // Generate Code 4PPPP
                 const pVal = Math.round(finalPressure * 10) % 10000;
                 code += `4${pVal.toString().padStart(4, '0')}`;
             } else {
-                debugBox.textContent = 'Final corrected MSL pressure: -- hPa';
+                debugBox.textContent = I18n.t('Final corrected MSL pressure: -- hPa');
                 code += '4////';
             }
 
@@ -1020,7 +1020,7 @@ const Renderers = {
             wrapper.className = 'input-group';
             
             const lbl = document.createElement('label');
-            lbl.textContent = label;
+            lbl.textContent = I18n.t(label);
             lbl.htmlFor = id;
             wrapper.appendChild(lbl);
 
@@ -1038,9 +1038,9 @@ const Renderers = {
                 if (type === 'number' && val !== '') {
                     const numVal = parseFloat(val);
                     if (min !== undefined && numVal < min) {
-                        inp.setCustomValidity(`Value must be >= ${min}`);
+                        inp.setCustomValidity(I18n.t('Value must be >= {limit}', { limit: min }));
                     } else if (max !== '' && numVal > parseFloat(max)) {
-                        inp.setCustomValidity(`Value must be <= ${max}`);
+                        inp.setCustomValidity(I18n.t('Value must be <= {limit}', { limit: max }));
                     } else {
                         inp.setCustomValidity('');
                     }
@@ -1054,7 +1054,7 @@ const Renderers = {
             if (help) {
                 const h = document.createElement('div');
                 h.className = 'help-text';
-                h.textContent = help;
+                h.textContent = I18n.t(help);
                 wrapper.appendChild(h);
             }
             return { wrapper, inp };
@@ -1063,7 +1063,7 @@ const Renderers = {
         const sitWrapper = document.createElement('div');
         sitWrapper.className = 'input-group';
         const sitLabel = document.createElement('label');
-        sitLabel.textContent = 'Swell Situation';
+        sitLabel.textContent = I18n.t('Swell Situation');
         sitWrapper.appendChild(sitLabel);
 
         const sitSelect = document.createElement('select');
@@ -1078,7 +1078,7 @@ const Renderers = {
         sitOptions.forEach(opt => {
             const option = document.createElement('option');
             option.value = opt.value;
-            option.textContent = opt.label;
+            option.textContent = I18n.t(opt.label);
             sitSelect.appendChild(option);
         });
         sitSelect.value = formData['swell_situation'] || 'a';
@@ -1098,18 +1098,18 @@ const Renderers = {
             const wrapper = document.createElement('div');
             wrapper.className = 'input-group';
             const lbl = document.createElement('label');
-            lbl.textContent = label;
+            lbl.textContent = I18n.t(label);
             wrapper.appendChild(lbl);
 
             const inp = document.createElement('input');
             inp.type = 'text';
             inp.id = id;
-            inp.placeholder = 'Degrees (0-360) or 0=Calm, 99=Confused';
+            inp.placeholder = I18n.t('Degrees (0-360) or 0=Calm, 99=Confused');
 
             // Initial Value
             const currentDir = formData[id];
-            if (currentDir === '0' || currentDir === '00') inp.value = 'Calm (0)';
-            else if (currentDir === '99') inp.value = 'Confused (99)';
+            if (currentDir === '0' || currentDir === '00') inp.value = I18n.t('Calm (0)');
+            else if (currentDir === '99') inp.value = I18n.t('Confused (99)');
             else if (currentDir) inp.value = `${parseInt(currentDir) * 10}`;
 
             inp.addEventListener('change', (e) => {
@@ -1117,12 +1117,12 @@ const Renderers = {
                 let code = '';
                 let display = '';
 
-                if (val === 'calm' || val === '0' || val === '00') {
+                if (val === 'calm' || val === I18n.t('Calm (0)').toLowerCase() || val === '0' || val === '00') {
                     code = '00';
-                    display = 'Calm (0)';
-                } else if (val === 'confused' || val === 'var' || val === '99') {
+                    display = I18n.t('Calm (0)');
+                } else if (val === 'confused' || val === 'var' || val === I18n.t('Confused (99)').toLowerCase() || val === '99') {
                     code = '99';
-                    display = 'Confused (99)';
+                    display = I18n.t('Confused (99)');
                 } else {
                     const num = parseFloat(val);
                     if (!isNaN(num)) {
@@ -1130,13 +1130,13 @@ const Renderers = {
                             let tens = Math.round(num / 10);
                             if (tens === 0) {
                                 code = '00';
-                                display = 'Calm (0)';
+                                display = I18n.t('Calm (0)');
                             } else {
                                 code = tens.toString().padStart(2, '0');
-                                display = `${num}° (Code: ${code})`;
+                                display = I18n.t('{degrees}° (Code: {code})', { degrees: num, code });
                             }
                         } else {
-                            alert('Direction must be 0-360');
+                            alert(I18n.t('Direction must be 0-360'));
                             e.target.value = '';
                             return;
                         }
@@ -1160,7 +1160,7 @@ const Renderers = {
             wrapper.appendChild(inp);
             const h = document.createElement('div');
             h.className = 'help-text';
-            h.textContent = 'Input degrees (0-360). 0=Calm, 99=Confused.';
+            h.textContent = I18n.t('Input degrees (0-360). 0=Calm, 99=Confused.');
             wrapper.appendChild(h);
             
             return { wrapper, inp };
@@ -1267,7 +1267,7 @@ const Renderers = {
             wrapper.className = 'input-group';
             
             const lbl = document.createElement('label');
-            lbl.textContent = label;
+            lbl.textContent = I18n.t(label);
             lbl.htmlFor = id;
             wrapper.appendChild(lbl);
 
@@ -1285,9 +1285,9 @@ const Renderers = {
                 if (type === 'number' && val !== '') {
                     const numVal = parseFloat(val);
                     if (min !== undefined && numVal < min) {
-                        inp.setCustomValidity(`Value must be >= ${min}`);
+                        inp.setCustomValidity(I18n.t('Value must be >= {limit}', { limit: min }));
                     } else if (max !== undefined && numVal > max) {
-                        inp.setCustomValidity(`Value must be <= ${max}`);
+                        inp.setCustomValidity(I18n.t('Value must be <= {limit}', { limit: max }));
                     } else {
                         inp.setCustomValidity('');
                     }
@@ -1301,7 +1301,7 @@ const Renderers = {
             if (help) {
                 const h = document.createElement('div');
                 h.className = 'help-text';
-                h.textContent = help;
+                h.textContent = I18n.t(help);
                 wrapper.appendChild(h);
             }
             return { wrapper, inp };
@@ -1311,7 +1311,7 @@ const Renderers = {
         methodWrapper.className = 'input-group';
         methodWrapper.classList.add('cached');
         const methodLabel = document.createElement('label');
-        methodLabel.textContent = 'Method (ss)';
+        methodLabel.textContent = I18n.t('Method (ss)');
         methodWrapper.appendChild(methodLabel);
 
         const methodSelect = document.createElement('select');
@@ -1325,7 +1325,7 @@ const Renderers = {
         methods.forEach(m => {
             const opt = document.createElement('option');
             opt.value = m.value;
-            opt.textContent = m.label;
+            opt.textContent = I18n.t(m.label);
             methodSelect.appendChild(opt);
         });
         methodSelect.value = formData['sst_method'] || '/';
@@ -1392,7 +1392,7 @@ const Renderers = {
             wrapper.className = 'input-group';
             
             const lbl = document.createElement('label');
-            lbl.textContent = label;
+            lbl.textContent = I18n.t(label);
             lbl.htmlFor = id;
             wrapper.appendChild(lbl);
 
@@ -1410,9 +1410,9 @@ const Renderers = {
                 if (type === 'number' && val !== '') {
                     const numVal = parseFloat(val);
                     if (min !== undefined && numVal < min) {
-                        inp.setCustomValidity(`Value must be >= ${min}`);
+                        inp.setCustomValidity(I18n.t('Value must be >= {limit}', { limit: min }));
                     } else if (max !== undefined && numVal > max) {
-                        inp.setCustomValidity(`Value must be <= ${max}`);
+                        inp.setCustomValidity(I18n.t('Value must be <= {limit}', { limit: max }));
                     } else {
                         inp.setCustomValidity('');
                     }
@@ -1426,7 +1426,7 @@ const Renderers = {
             if (help) {
                 const h = document.createElement('div');
                 h.className = 'help-text';
-                h.textContent = help;
+                h.textContent = I18n.t(help);
                 wrapper.appendChild(h);
             }
             return { wrapper, inp };
@@ -1442,16 +1442,16 @@ const Renderers = {
         const periodWrapper = document.createElement('div');
         periodWrapper.className = 'input-group';
         const periodLabel = document.createElement('label');
-        periodLabel.textContent = 'Period (PwPw) [0 - 50 Seconds]';
+        periodLabel.textContent = I18n.t('Period (PwPw) [0 - 50 Seconds]');
         periodWrapper.appendChild(periodLabel);
 
         const periodInput = document.createElement('input');
         periodInput.type = 'text';
-        periodInput.placeholder = 'Seconds (0-50) or 99=Confused';
+        periodInput.placeholder = I18n.t('Seconds (0-50) or 99=Confused');
         
         const currentPer = formData['wave_period'];
-        if (currentPer === '99') periodInput.value = 'Confused (99)';
-        else if (currentPer === '/') periodInput.value = 'Not Determined (/)';
+        if (currentPer === '99') periodInput.value = I18n.t('Confused (99)');
+        else if (currentPer === '/') periodInput.value = I18n.t('Not Determined (/)');
         else if (currentPer) periodInput.value = currentPer;
 
         periodInput.addEventListener('change', (e) => {
@@ -1459,12 +1459,12 @@ const Renderers = {
             let code = '';
             let display = '';
 
-            if (val === 'confused' || val === '99') {
+            if (val === 'confused' || val === I18n.t('Confused (99)').toLowerCase() || val === '99') {
                 code = '99';
-                display = 'Confused (99)';
-            } else if (val === '/' || val === 'not determined' || val === '') {
+                display = I18n.t('Confused (99)');
+            } else if (val === '/' || val === 'not determined' || val === I18n.t('Not Determined (/)').toLowerCase() || val === '') {
                 code = '/';
-                display = 'Not Determined (/)';
+                display = I18n.t('Not Determined (/)');
             } else {
                 const num = parseFloat(val);
                 if (!isNaN(num)) {
@@ -1472,13 +1472,13 @@ const Renderers = {
                         code = Math.round(num).toString();
                         display = code;
                     } else {
-                        alert('Period must be 0-50');
+                        alert(I18n.t('Period must be 0-50'));
                         e.target.value = '';
                         return;
                     }
                 } else {
                     code = '/';
-                    display = 'Not Determined (/)';
+                    display = I18n.t('Not Determined (/)');
                 }
             }
             store.updateFormData('wave_period', code);
@@ -1544,7 +1544,7 @@ const Renderers = {
             const wrapper = document.createElement('div');
             wrapper.className = 'input-group';
             const lbl = document.createElement('label');
-            lbl.textContent = label;
+            lbl.textContent = I18n.t(label);
             wrapper.appendChild(lbl);
             
             const sel = document.createElement('select');
@@ -1552,7 +1552,7 @@ const Renderers = {
             options.forEach(opt => {
                 const o = document.createElement('option');
                 o.value = opt.value;
-                o.textContent = opt.label;
+                o.textContent = I18n.t(opt.label);
                 sel.appendChild(o);
             });
             sel.value = formData[id] || '/';
@@ -1577,7 +1577,7 @@ const Renderers = {
 
         const thickWrapper = document.createElement('div');
         thickWrapper.className = 'input-group';
-        thickWrapper.innerHTML = '<label>Thickness [0 - 99 cm]</label>';
+        thickWrapper.innerHTML = `<label>${I18n.t('Thickness [0 - 99 cm]')}</label>`;
         const thickInput = document.createElement('input');
         thickInput.type = 'number';
         thickInput.min = 0;

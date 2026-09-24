@@ -10,8 +10,21 @@
 </head>
 <body>
     <header>
-        <h1>Weather Report Composer <small style="font-size: 0.5em; font-weight: normal; opacity: 0.8;">Version <span id="app-version"></span></small></h1>
-        <div id="step-indicator">Step 1 of X</div>
+        <div class="header-main">
+            <h1>Weather Report Composer <small style="font-size: 0.5em; font-weight: normal; opacity: 0.8;">Version <span id="app-version"></span></small></h1>
+            <div id="step-indicator">Step 1 of X</div>
+        </div>
+        <div class="language-control">
+            <label id="language-label" for="language-select">Language</label>
+            <select id="language-select" aria-label="Language">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="zh-Hant">繁體中文</option>
+                <option value="zh-Hans">简体中文</option>
+                <option value="th">ไทย</option>
+            </select>
+        </div>
     </header>
 
     <main id="app-container">
@@ -41,6 +54,7 @@
     <script>
         document.getElementById('app-version').textContent = APP_VERSION;
     </script>
+    <script src="i18n.js"></script>
     <script src="data.js"></script>
     <script src="store.js"></script>
     <script src="renderers.js"></script>

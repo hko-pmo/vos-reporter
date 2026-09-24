@@ -9,23 +9,47 @@ const btnNext = document.getElementById('btn-next');
 const btnSkip = document.getElementById('btn-skip');
 const cloudModal = document.getElementById('cloud-modal');
 const closeModalBtn = document.querySelector('.close-modal');
+const languageSelect = document.getElementById('language-select');
+let activeCloudChart = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     // Data is loaded in Store constructor
+    applyStaticUiLanguage();
+    languageSelect.addEventListener('change', () => {
+        I18n.setLocale(languageSelect.value);
+        applyStaticUiLanguage();
+        renderStep();
+        if (activeCloudChart) {
+            openCloudModal(activeCloudChart.type, activeCloudChart.fieldId);
+        }
+    });
     renderStep();
     setupEventListeners();
 
     // Modal Close
     if (closeModalBtn) {
-        closeModalBtn.onclick = () => cloudModal.classList.add('hidden');
+        closeModalBtn.onclick = () => {
+            activeCloudChart = null;
+            cloudModal.classList.add('hidden');
+        };
     }
     window.onclick = (event) => {
         if (event.target == cloudModal) {
+            activeCloudChart = null;
             cloudModal.classList.add('hidden');
         }
     };
 });
+
+function applyStaticUiLanguage() {
+    document.documentElement.lang = I18n.locale;
+    languageSelect.value = I18n.locale;
+    languageSelect.setAttribute('aria-label', I18n.t('Language'));
+    document.getElementById('language-label').textContent = I18n.t('Language');
+    btnBack.textContent = I18n.t('Back');
+    btnSkip.textContent = I18n.t('Skip');
+}
 
 function setupEventListeners() {
     btnBack.addEventListener('click', handleBack);
@@ -57,7 +81,10 @@ function renderStep() {
     const group = REPORT_STRUCTURE[currentStepIndex];
     
     // Update Header
-    stepIndicator.textContent = `Step ${currentStepIndex + 1} of ${REPORT_STRUCTURE.length}`;
+    stepIndicator.textContent = I18n.t('Step {current} of {total}', {
+        current: currentStepIndex + 1,
+        total: REPORT_STRUCTURE.length
+    });
     
     // Reset Button State
     btnBack.classList.remove('hidden', 'invisible');
@@ -69,11 +96,11 @@ function renderStep() {
     if (state.returnToReview) {
         // Edit Mode: Hide Back, Show Skip (if optional), Next -> Return
         btnBack.classList.add('invisible');
-        btnNext.textContent = 'Return to Review';
+        btnNext.textContent = I18n.t('Return to Review');
     } else {
         // Wizard Mode
         if (currentStepIndex === 0) btnBack.disabled = true;
-        btnNext.textContent = 'Next';
+        btnNext.textContent = I18n.t('Next');
     }
     
     // Skip button visibility
@@ -89,30 +116,30 @@ function renderStep() {
     if (group.id === 'identification') {
         const instructionTitle = document.createElement('h2');
         instructionTitle.className = 'group-title';
-        instructionTitle.textContent = 'Instruction';
+        instructionTitle.textContent = I18n.t('Instruction');
         groupDiv.appendChild(instructionTitle);
 
         if (group.description) {
             const desc = document.createElement('p');
             desc.className = 'group-description';
-            desc.textContent = group.description;
+            desc.textContent = I18n.t(group.description);
             groupDiv.appendChild(desc);
         }
 
         const title = document.createElement('h2');
         title.className = 'group-title';
-        title.textContent = group.name;
+        title.textContent = I18n.t(group.name);
         groupDiv.appendChild(title);
     } else {
         const title = document.createElement('h2');
         title.className = 'group-title';
-        title.textContent = group.name;
+        title.textContent = I18n.t(group.name);
         groupDiv.appendChild(title);
 
         if (group.description) {
             const desc = document.createElement('p');
             desc.className = 'group-description';
-            desc.textContent = group.description;
+            desc.textContent = I18n.t(group.description);
             groupDiv.appendChild(desc);
         }
     }
@@ -152,14 +179,14 @@ function renderStep() {
             }
 
             const label = document.createElement('label');
-            label.textContent = field.label;
+            label.textContent = I18n.t(field.label);
             label.htmlFor = field.id;
 
             // Add Cloud Chart Button
             if (field.cloudType) {
                 const chartBtn = document.createElement('button');
                 chartBtn.className = 'show-chart-btn';
-                chartBtn.textContent = 'Show Chart';
+                chartBtn.textContent = I18n.t('Show Chart');
                 chartBtn.type = 'button'; // Prevent form submission
                 chartBtn.onclick = () => openCloudModal(field.cloudType, field.id);
                 label.appendChild(chartBtn);
@@ -178,7 +205,7 @@ function renderStep() {
                 field.options.forEach(opt => {
                     const option = document.createElement('option');
                     option.value = opt.value;
-                    option.textContent = opt.label;
+                    option.textContent = I18n.t(opt.label);
                     input.appendChild(option);
                 });
             } else {
@@ -234,9 +261,9 @@ function renderStep() {
                         // Optional: Visual feedback or clamping
                         // For now, we allow typing but maybe show red border?
                         // Or we can enforce on blur.
-                        input.setCustomValidity(`Value must be >= ${field.min}`);
+                        input.setCustomValidity(I18n.t('Value must be >= {limit}', { limit: field.min }));
                     } else if (field.max !== undefined && numVal > field.max) {
-                        input.setCustomValidity(`Value must be <= ${field.max}`);
+                        input.setCustomValidity(I18n.t('Value must be <= {limit}', { limit: field.max }));
                     } else {
                         input.setCustomValidity('');
                     }
@@ -257,7 +284,7 @@ function renderStep() {
             if (field.help) {
                 const help = document.createElement('div');
                 help.className = 'help-text';
-                help.textContent = field.help;
+                help.textContent = I18n.t(field.help);
                 inputGroup.appendChild(help);
             }
 
@@ -285,7 +312,7 @@ function handleNext() {
     const code = store.generateGroupCode(group);
 
     if (group.mandatory && code === '...') {
-        alert('Please complete all fields in this mandatory group.');
+        alert(I18n.t('Please complete all fields in this mandatory group.'));
         return;
     }
 
@@ -389,10 +416,10 @@ function renderReviewScreen() {
     // Copy Button
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-btn';
-    copyBtn.textContent = 'Copy to Clipboard';
+    copyBtn.textContent = I18n.t('Copy to Clipboard');
     copyBtn.onclick = () => {
         navigator.clipboard.writeText(fullString).then(() => {
-            alert('Copied to clipboard!');
+            alert(I18n.t('Copied to clipboard!'));
         });
     };
     container.appendChild(copyBtn);
@@ -400,10 +427,10 @@ function renderReviewScreen() {
     // Mail Button
     const mailBtn = document.createElement('button');
     mailBtn.className = 'mail-btn';
-    mailBtn.textContent = 'Send via Email (will launch mail client)';
+    mailBtn.textContent = I18n.t('Send via Email (will launch mail client)');
     mailBtn.onclick = () => {
         const recipient = store.getFormData()['email_recipient'] || '';
-        const subject = 'OBS email';
+        const subject = I18n.t('OBS email');
         const body = encodeURIComponent(fullString);
         window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
     };
@@ -418,7 +445,7 @@ function renderReviewScreen() {
     helpText.style.color = '#666';
     helpText.style.fontStyle = 'italic';
     helpText.style.marginBottom = '1rem';
-    helpText.textContent = 'Note: Some sections may have been automatically skipped. You can click "Add" to include them.';
+    helpText.textContent = I18n.t('Note: Some sections may have been automatically skipped. You can click "Add" to include them.');
     container.appendChild(helpText);
 
     REPORT_STRUCTURE.forEach((group, index) => {
@@ -430,15 +457,15 @@ function renderReviewScreen() {
         if (isSkipped) item.classList.add('skipped');
         
         const label = document.createElement('span');
-        label.textContent = group.name;
+        label.textContent = I18n.t(group.name);
         
         const codeSpan = document.createElement('span');
         codeSpan.className = 'code';
-        codeSpan.textContent = isSkipped ? '(Skipped)' : code;
+        codeSpan.textContent = isSkipped ? I18n.t('(Skipped)') : code;
 
         const editBtn = document.createElement('button');
         editBtn.className = 'edit-btn';
-        editBtn.textContent = isSkipped ? 'Add' : 'Edit';
+        editBtn.textContent = I18n.t(isSkipped ? 'Add' : 'Edit');
         editBtn.onclick = () => {
             store.setState({
                 currentStepIndex: index,
@@ -462,9 +489,9 @@ function renderReviewScreen() {
     startOverBtn.className = 'nav-btn secondary';
     startOverBtn.style.marginTop = '2rem';
     startOverBtn.style.width = '100%';
-    startOverBtn.textContent = 'Start New Report';
+    startOverBtn.textContent = I18n.t('Start New Report');
     startOverBtn.onclick = () => {
-        if(confirm('Start a new report? Current data will be lost.')) {
+        if(confirm(I18n.t('Start a new report? Current data will be lost.'))) {
             // Preserve persisted fields
             const formData = store.getFormData();
             const preservedData = {};
@@ -510,11 +537,12 @@ function renderReviewScreen() {
 function openCloudModal(type, fieldId) {
     const details = CLOUD_DETAILS[type];
     if (!details) return;
+    activeCloudChart = { type, fieldId };
 
     const modalTitle = document.getElementById('modal-title');
     const modalGrid = document.getElementById('modal-grid');
     
-    modalTitle.textContent = details.title;
+    modalTitle.textContent = I18n.t(details.title);
     modalGrid.innerHTML = '';
 
     Object.keys(details.types).forEach(key => {
@@ -529,6 +557,7 @@ function openCloudModal(type, fieldId) {
                 // Trigger change event
                 select.dispatchEvent(new Event('change'));
             }
+            activeCloudChart = null;
             cloudModal.classList.add('hidden');
         };
 
@@ -537,7 +566,7 @@ function openCloudModal(type, fieldId) {
             typeInfo.images.forEach(imgSrc => {
                 const img = document.createElement('img');
                 img.src = imgSrc;
-                img.alt = `Type ${key}`;
+                img.alt = I18n.t('Type {key}', { key });
                 img.loading = 'lazy';
                 card.appendChild(img);
             });
@@ -545,12 +574,12 @@ function openCloudModal(type, fieldId) {
 
         const codeDiv = document.createElement('div');
         codeDiv.className = 'cloud-code';
-        codeDiv.textContent = `Code: ${key}`;
+        codeDiv.textContent = I18n.t('Code: {key}', { key });
         card.appendChild(codeDiv);
 
         const descDiv = document.createElement('div');
         descDiv.className = 'cloud-desc';
-        descDiv.textContent = typeInfo.desc;
+        descDiv.textContent = I18n.t(typeInfo.desc);
         card.appendChild(descDiv);
 
         const creditDiv = document.createElement('div');
