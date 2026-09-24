@@ -26,6 +26,7 @@ const Renderers = {
 
         const createRadio = (id, name, options, isHorizontal = false) => {
             const wrapper = document.createElement('div');
+            wrapper.className = 'position-direction-options';
             wrapper.style.display = 'flex';
             wrapper.style.flexDirection = isHorizontal ? 'row' : 'column';
             wrapper.style.justifyContent = 'center';
@@ -33,10 +34,9 @@ const Renderers = {
             
             options.forEach(opt => {
                 const row = document.createElement('div');
+                row.className = 'position-direction-option';
                 if (isHorizontal) {
                     row.style.marginRight = '1rem';
-                    row.style.display = 'flex';
-                    row.style.alignItems = 'center';
                 } else {
                     row.style.marginBottom = '0.2rem';
                 }
@@ -52,6 +52,7 @@ const Renderers = {
                 });
 
                 const lbl = document.createElement('label');
+                lbl.className = 'position-direction-label';
                 lbl.textContent = I18n.t(opt.label);
                 lbl.style.marginLeft = '0.3rem';
                 lbl.style.fontWeight = 'normal';
@@ -266,6 +267,11 @@ const Renderers = {
         // Actually in data.js it is hidden: true, default: '/'. So we skip rendering it if hidden.
         
         // Wind Direction (Smart Input)
+        const windCorrectionTip = document.createElement('div');
+        windCorrectionTip.className = 'help-text wind-correction-tip';
+        windCorrectionTip.textContent = I18n.t('The wind speed and direction entered should already be corrected for the effect of ship speed.');
+        container.appendChild(windCorrectionTip);
+
         const dirWrapper = document.createElement('div');
         dirWrapper.className = 'input-group';
         const dirLabel = document.createElement('label');

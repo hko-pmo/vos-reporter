@@ -29,8 +29,8 @@ const REPORT_STRUCTURE = [
                 width: 1,
                 persist: true,
                 options: [
-                    { value: '3', label: '3: Speed estimated (knots)' },
-                    { value: '4', label: '4: Speed measured (knots)' },
+                    { value: '3', label: '3: Wind speed is estimated (knots)' },
+                    { value: '4', label: '4: Wind speed is measured (knots)' },
                     // { value: '1', label: '1: Speed estimated (m/s)' },
                     // { value: '0', label: '0: Speed measured (m/s)' }
                 ]

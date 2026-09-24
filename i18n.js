@@ -734,8 +734,9 @@ const I18n = (() => {
 
     const optionTranslations = {
         es: {
-            'Speed estimated (knots)': 'Velocidad estimada (nudos)',
-            'Speed measured (knots)': 'Velocidad medida (nudos)',
+            'Wind speed is estimated (knots)': 'La velocidad del viento es estimada (nudos)',
+            'The wind speed and direction entered should already be corrected for the effect of ship speed.': 'La velocidad y dirección del viento introducidas ya deben estar corregidas por el efecto de la velocidad del buque.',
+            'Wind speed is measured (knots)': 'La velocidad del viento se mide (nudos)',
             'Not determined': 'No determinado',
             'Stationary': 'Estacionario',
             'Unknown': 'Desconocido',
@@ -826,8 +827,9 @@ const I18n = (() => {
             'Icing from spray + rain': 'Engelamiento por rociones y lluvia'
         },
         fr: {
-            'Speed estimated (knots)': 'Vitesse estimée (nœuds)',
-            'Speed measured (knots)': 'Vitesse mesurée (nœuds)',
+            'Wind speed is estimated (knots)': 'La vitesse du vent est estimée (nœuds)',
+            'The wind speed and direction entered should already be corrected for the effect of ship speed.': 'La vitesse et la direction du vent saisies doivent déjà être corrigées de l’effet de la vitesse du navire.',
+            'Wind speed is measured (knots)': 'La vitesse du vent est mesurée (nœuds)',
             'Not determined': 'Indéterminé',
             'Stationary': 'À l’arrêt',
             'Unknown': 'Inconnu',
@@ -918,8 +920,9 @@ const I18n = (() => {
             'Icing from spray + rain': 'Givrage par embruns et pluie'
         },
         'zh-Hant': {
-            'Speed estimated (knots)': '風速估計（節）',
-            'Speed measured (knots)': '風速實測（節）',
+            'Wind speed is estimated (knots)': '風速為估計值（節）',
+            'The wind speed and direction entered should already be corrected for the effect of ship speed.': '輸入的風速和風向應已修正船速造成的影響。',
+            'Wind speed is measured (knots)': '風速為實測值（節）',
             'Not determined': '未能確定',
             'Stationary': '靜止',
             'Unknown': '不詳',
@@ -1010,8 +1013,9 @@ const I18n = (() => {
             'Icing from spray + rain': '飛沫及雨造成積冰'
         },
         'zh-Hans': {
-            'Speed estimated (knots)': '风速估测（节）',
-            'Speed measured (knots)': '风速实测（节）',
+            'Wind speed is estimated (knots)': '风速为估测值（节）',
+            'The wind speed and direction entered should already be corrected for the effect of ship speed.': '输入的风速和风向应已修正船速造成的影响。',
+            'Wind speed is measured (knots)': '风速为实测值（节）',
             'Not determined': '未能确定',
             'Stationary': '静止',
             'Unknown': '不详',
@@ -1102,8 +1106,9 @@ const I18n = (() => {
             'Icing from spray + rain': '飞沫和雨造成积冰'
         },
         th: {
-            'Speed estimated (knots)': 'ความเร็วลมโดยประมาณ (นอต)',
-            'Speed measured (knots)': 'ความเร็วลมที่วัดได้ (นอต)',
+            'Wind speed is estimated (knots)': 'ความเร็วลมเป็นค่าประมาณ (นอต)',
+            'The wind speed and direction entered should already be corrected for the effect of ship speed.': 'ความเร็วลมและทิศทางลมที่ป้อนควรได้รับการแก้ไขผลกระทบจากความเร็วเรือแล้ว',
+            'Wind speed is measured (knots)': 'ความเร็วลมเป็นค่าที่วัดได้ (นอต)',
             'Not determined': 'ไม่สามารถระบุได้',
             'Stationary': 'หยุดนิ่ง',
             'Unknown': 'ไม่ทราบ',
