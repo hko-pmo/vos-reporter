@@ -9,7 +9,7 @@ const REPORT_STRUCTURE = [
         wmoOrder: 0,
         fields: [
             { id: 'bbxx', type: 'static', value: 'BBXX ', label: 'Report Type' },
-            { id: 'callsign', type: 'text', label: 'SOT-ID (if not, call sign)', width: 0, uppercase: true, persist: true },
+            { id: 'callsign', type: 'text', label: 'Station ID (if not, call sign)', width: 0, uppercase: true, persist: true },
             { id: 'email_recipient', type: 'text', label: 'Email Recipient of Weather Report', width: 0, persist: true, excludeFromCode: true }
         ]
     },

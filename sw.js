@@ -51,7 +51,17 @@ self.addEventListener('fetch', (e) => {
     if (url.pathname.includes('/clouds/')) {
         e.respondWith(
             caches.match(e.request).then((response) => {
-                return response || fetch(e.request);
+                if (response) return response;
+
+                return fetch(e.request).then((networkResponse) => {
+                    if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                        return networkResponse;
+                    }
+
+                    return caches.open(CACHE_NAME).then((cache) => {
+                        return cache.put(e.request, networkResponse.clone()).then(() => networkResponse);
+                    });
+                });
             })
         );
         return;
