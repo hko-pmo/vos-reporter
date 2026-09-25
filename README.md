@@ -1,30 +1,28 @@
 # VOS Weather Report App (FM 13 SHIP)
 
-A Progressive Web Application (PWA) designed for Voluntary Observing Ships (VOS) to compile and generate FM 13 SHIP weather reports.
+A Progressive Web App (PWA) for Voluntary Observing Ships (VOS) to prepare and generate FM 13 SHIP weather reports using the World Meteorological Organization (WMO) code format.
 
 ## Features
 
-- **Wizard Interface**: Step-by-step data entry for all FM 13 sections (Identification, Weather, Marine).
-- **Code Generation**: Automatically formats data into the correct WMO code string (e.g., `BBXX ...`).
-- **Validation**: Ensures mandatory fields are filled and values are within valid ranges.
-- **Smart Defaults**: Pre-fills common values and handles optional groups (skipping them by default where appropriate).
-- **Offline Capable**: Can be installed as a PWA and used without an internet connection.
-- **Review Mode**: Allows editing of specific groups before finalizing the report.
+- **Step-by-step entry**: Enter identification, meteorological, and marine observations.
+- **Report generation**: Formats the entries as an FM 13 SHIP report (for example, `BBXX ...`).
+- **Validation**: Checks required fields and value ranges.
+- **Review and editing**: Review the report, edit sections, and add optional sections before copying it.
+- **Multiple languages**: The interface is available in English, Spanish, French, Traditional Chinese, Simplified Chinese, and Thai.
 
 ## Usage
 
-1.  **Identification**: Enter ship callsign, date, time, and position.
-2.  **Weather Data**: Input observed weather conditions (wind, clouds, temp, pressure, etc.).
-3.  **Marine Data**: Input sea conditions (SST, waves, swell, ice). Some groups are skipped by default but can be added in the review phase.
-4.  **Review**: Check the generated code. Click "Edit" to modify any group or "Add" to include skipped groups (like Swell or Ice).
-5.  **Copy**: Click "Copy to Clipboard" to get the final code string for transmission.
+1. **Identification**: Enter the station ID. Use the vessel's radio call sign only if the station ID is unclear. Enter the observation date, time, and position.
+2. **Weather observations**: Enter the observed wind, cloud, temperature, pressure, and weather conditions.
+3. **Marine observations**: Enter sea temperature, waves, swell, and ice conditions. Optional sections can be added during review.
+4. **Review**: Check the generated report. Edit a section or add any skipped sections as needed.
+5. **Copy**: Copy the completed report for transmission.
 
 ## Low-Bandwidth / Shipboard Notes
 
-- **Very small app payload**: The core app is plain HTML/CSS/JS with small built-in images for cloud charts.
-- **Offline use**: This is a PWA. After the first successful load, core files are cached by the Service Worker.
-- **Cloud charts are on-demand**: Cloud chart images are cached the first time you open them. If you need them fully offline, open the cloud chart modal once while you have connectivity.
-- **Updates**: When online, the app checks for updates and refreshes cached files based on the app version.
+- **Low data use**: The app uses plain HTML, CSS, and JavaScript. Cloud-chart images are loaded when needed.
+- **Offline use**: The Service Worker caches core app files during installation. Cloud-chart images are cached after their first successful load, so open any charts you may need offline while connected.
+- **Updates**: While online, the app checks for Service Worker updates about every 30 days. An update may reload the app after it is installed.
 
 ## Cached Inputs (Saved Settings)
 
@@ -32,7 +30,7 @@ Some inputs are intentionally **cached in the browser (localStorage)** to reduce
 
 - **UI indicator**: Inputs with a subtle green bar on the left are **saved on this device** and will be auto-filled next time.
 - **Examples of cached inputs** (may expand over time):
-    - Callsign, email recipient
+    - Station ID (or vessel call sign when needed), email recipient
     - Wind indicator
     - Humidity measurement mode
     - Sea surface temperature method
@@ -63,7 +61,7 @@ The report is constructed of 5-character groups.
 
 ### Section 0: Identification (Mandatory)
 1.  **BBXX**: Fixed identifier.
-2.  **CALLSIGN**: Ship's callsign (Saved in local storage).
+2.  **CALLSIGN**: Station ID; use the vessel's radio call sign only if the station ID is unclear. The entry is saved in this browser.
 3.  **YYGGiw**:
     *   `YY`: Day of month (01-31).
     *   `GG`: Hour (00, 06, 12, 18, etc.).

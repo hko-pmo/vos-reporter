@@ -1,2 +1,4 @@
-const APP_VERSION = '0.33';
+const APP_VERSION = '0.38';
 const CACHE_NAME = 'vos-app-v' + APP_VERSION;
+// Set true for the operational release to restore offline caching.
+const OFFLINE_CACHE_ENABLED = true;

@@ -61,9 +61,57 @@
     <script src="app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('SW registered', reg))
-                .catch(err => console.log('SW error', err));
+                const updateCheckKey = 'vos_sw_last_update_check';
+                const updateCheckInterval = 30 * 24 * 60 * 60 * 1000;
+                let updateCheckInProgress = false;
+                let retryAfterCurrentCheck = false;
+                let alreadyControlled = Boolean(navigator.serviceWorker.controller);
+
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (alreadyControlled) window.location.reload();
+                    alreadyControlled = true;
+                });
+
+                async function checkForServiceWorkerUpdate(registration) {
+                    if (!navigator.onLine) return;
+                    if (updateCheckInProgress) {
+                        retryAfterCurrentCheck = true;
+                        return;
+                    }
+
+                    const lastCheck = Number(localStorage.getItem(updateCheckKey)) || 0;
+                    if (Date.now() - lastCheck < updateCheckInterval) return;
+
+                    updateCheckInProgress = true;
+                    try {
+                        await registration.update();
+                        localStorage.setItem(updateCheckKey, String(Date.now()));
+                    } catch (err) {
+                        console.warn('SW update check failed; it will retry later.', err);
+                    } finally {
+                        updateCheckInProgress = false;
+                        if (retryAfterCurrentCheck) {
+                            const shouldRetry = navigator.onLine;
+                            retryAfterCurrentCheck = false;
+                            if (shouldRetry) checkOnReconnect();
+                        }
+                    }
+                }
+
+                function checkOnReconnect() {
+                    navigator.serviceWorker.getRegistration()
+                        .then(registration => registration || navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }))
+                        .then(checkForServiceWorkerUpdate)
+                        .catch(err => console.warn('SW update check failed; it will retry later.', err));
+                }
+
+                window.addEventListener('online', checkOnReconnect);
+                navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+                    .then(registration => {
+                        console.log('SW registered', registration);
+                        checkForServiceWorkerUpdate(registration);
+                    })
+                    .catch(err => console.warn('SW registration failed; it will retry when online.', err));
         }
     </script>
 </body>

@@ -18,10 +18,9 @@ self.addEventListener('install', (e) => {
     // Force this service worker to become the active one, bypassing the waiting state
     self.skipWaiting(); 
     
-    e.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS);
-        })
+    e.waitUntil(OFFLINE_CACHE_ENABLED
+        ? caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+        : Promise.resolve()
     );
 });
 
@@ -34,7 +33,7 @@ self.addEventListener('activate', (e) => {
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cache) => {
-                    if (cache !== CACHE_NAME) {
+                    if (cache.startsWith('vos-app-v') && (!OFFLINE_CACHE_ENABLED || cache !== CACHE_NAME)) {
                         console.log('Clearing old cache:', cache);
                         return caches.delete(cache);
                     }
@@ -46,6 +45,11 @@ self.addEventListener('activate', (e) => {
 
 // Fetch event: Network First for App, Cache First for Clouds
 self.addEventListener('fetch', (e) => {
+    if (!OFFLINE_CACHE_ENABLED) {
+        e.respondWith(fetch(e.request, { cache: 'no-store' }));
+        return;
+    }
+
     const url = new URL(e.request.url);
 
     // Strategy 1: Cache First for Cloud Images (they don't change often and are large)
