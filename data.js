@@ -3,7 +3,8 @@ const REPORT_STRUCTURE = [
     {
         id: 'identification',
         name: 'Identification',
-        description: "This webpage is for Voluntary Observing Ships to compile FM13 SHIP weather reports. Follow the steps to complete the reports. Steps 1~4 are mandatory, while other steps can be skipped. At the end you will be redirected to send the report via email. Inputs with a green bar on the left are saved on this device (cached), so they will be auto-filled next time. For suggestions and feedbacks, please send them to hkopmo@hko.gov.hk (this is NOT the report recipient address).",
+        description: "This webpage is for Voluntary Observing Ships to compile FM13 SHIP weather reports. Follow the steps to complete the reports. Steps 1~4 are mandatory, while other steps can be skipped. At the end, you can send the report by email. Inputs with a green bar on the left are saved on this device and will be filled in automatically next time. For feedback, contact hkopmo@hko.gov.hk (this is NOT the report recipient address).",
+        descriptionNote: 'Every weather report you submit helps improve global weather forecasts and the safety of navigation.',
         section: 0,
         mandatory: true,
         wmoOrder: 0,

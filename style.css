@@ -150,6 +150,11 @@ main {
     margin-bottom: 1.5rem;
 }
 
+.group-description-note {
+    margin-top: -1rem;
+    font-style: italic;
+}
+
 .input-group {
     margin-bottom: 1.5rem;
 }

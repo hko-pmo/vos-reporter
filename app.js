@@ -126,6 +126,13 @@ function renderStep() {
             groupDiv.appendChild(desc);
         }
 
+        if (group.descriptionNote) {
+            const note = document.createElement('p');
+            note.className = 'group-description group-description-note';
+            note.textContent = I18n.t(group.descriptionNote);
+            groupDiv.appendChild(note);
+        }
+
         const title = document.createElement('h2');
         title.className = 'group-title';
         title.textContent = I18n.t(group.name);
